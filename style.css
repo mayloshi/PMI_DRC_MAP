@@ -16,7 +16,7 @@
 
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Aptos, Calibri, Tahoma, Arial, sans-serif;
   background-color: #edf1f7;
   background-image:
     linear-gradient(rgba(237, 241, 247, .92), rgba(237, 241, 247, .92)),
@@ -173,6 +173,26 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
   align-content: start;
   gap: 14px;
   padding: 18px;
+}
+
+.mini-tutorial {
+  padding: 12px;
+  border: 1px solid #dce8f1;
+  border-left: 4px solid var(--pmi-cyan);
+  border-radius: 8px;
+  background: #f7fbfd;
+}
+
+.mini-tutorial ol {
+  margin: 9px 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.mini-tutorial li + li {
+  margin-top: 4px;
 }
 
 .field label, .field-label {

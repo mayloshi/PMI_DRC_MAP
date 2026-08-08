@@ -11,6 +11,15 @@
     'Oceanie'
   ];
 
+  const continentEmojis = {
+    'Afrique hors RDC': '🌍',
+    Europe: '🇪🇺',
+    'Amerique du Nord': '🌎',
+    'Amerique latine': '🌎',
+    Asie: '🌏',
+    Oceanie: '🌊'
+  };
+
   const provinceNameMap = {
     'Central Kasai': 'Kasai-Central',
     'Lower Uele': 'Bas-Uele',
@@ -252,7 +261,7 @@
       profile.roles[role] = { active: true, zoneName, zoneType, updatedAt: now };
     });
 
-    let message = `Pointage enregistre pour ${roles.map(roleLabel).join(' et ')}.`;
+    let message = `Localisation enregistree pour ${roles.map(roleLabel).join(' et ')}.`;
     const newSecondRole = roles.length === 1 && ((roles[0] === 'member' && hasVolunteer) || (roles[0] === 'volunteer' && hasMember));
     if (newSecondRole) {
       profile.roles.member.zoneName = zoneName;
@@ -438,7 +447,7 @@
       button.type = 'button';
       button.className = 'continent';
       button.dataset.zone = name;
-      button.innerHTML = `<span><strong>${name}</strong><span class="mini-count" data-continent="${name}">M: 0 | V: 0</span></span><span>Choisir</span>`;
+      button.innerHTML = `<span><strong>${continentEmojis[name] || '🌍'} ${name}</strong><span class="mini-count" data-continent="${name}">M: 0 | V: 0</span></span><span>Choisir</span>`;
       button.addEventListener('click', () => onZoneClick(name, 'Continent'));
       root.appendChild(button);
     });
@@ -510,7 +519,7 @@
       if (profile && email && profile.email !== email) throw new Error('Ce PMI ID est deja associe a un autre email.');
       if (profile && pmiId && profile.pmiId !== pmiId) throw new Error('Cet email est deja associe a un autre PMI ID.');
       if (!profile) {
-        if (!email || !pmiId) throw new Error('Pour un premier pointage, renseignez email et PMI ID.');
+        if (!email || !pmiId) throw new Error('Pour une premiere localisation, renseignez email et PMI ID.');
         profile = blankProfile(identity);
         profiles.push(profile);
       }
@@ -534,7 +543,7 @@
       const email = normalizeEmail(identity.email);
       const pmiId = normalizePmiId(identity.pmiId);
       const profile = profiles.find(item => (email && item.email === email) || (pmiId && item.pmiId === pmiId));
-      if (!profile) throw new Error('Aucun pointage trouve pour cet email ou ce PMI ID.');
+      if (!profile) throw new Error('Aucune localisation trouvee pour cet email ou ce PMI ID.');
       if (email && profile.email !== email) throw new Error('Ce PMI ID est associe a un autre email.');
       if (pmiId && profile.pmiId !== pmiId) throw new Error('Cet email est associe a un autre PMI ID.');
       const result = applyRoleOperation(profile, roleChoice, 'cancel', '', '');
@@ -685,7 +694,7 @@
     const pad = 48;
     const barW = Math.max(10, (canvas.width - pad * 2) / entries.length - 4);
     ctx.fillStyle = '#1b1f2a';
-    ctx.font = '20px Arial';
+    ctx.font = '20px Aptos, Calibri, Tahoma, Arial';
     ctx.fillText('Membres et volontaires par province', pad, 30);
     entries.forEach(([name, item], index) => {
       const x = pad + index * (barW + 4);
@@ -699,14 +708,14 @@
       ctx.translate(x + 2, 485);
       ctx.rotate(-Math.PI / 3);
       ctx.fillStyle = '#344054';
-      ctx.font = '11px Arial';
+      ctx.font = '11px Aptos, Calibri, Tahoma, Arial';
       ctx.fillText(name, 0, 0);
       ctx.restore();
     });
     ctx.fillStyle = '#4f17a8';
     ctx.fillRect(pad, 45, 14, 14);
     ctx.fillStyle = '#1b1f2a';
-    ctx.font = '13px Arial';
+    ctx.font = '13px Aptos, Calibri, Tahoma, Arial';
     ctx.fillText('Membres', pad + 20, 57);
     ctx.fillStyle = '#00b5d1';
     ctx.fillRect(pad + 100, 45, 14, 14);
@@ -723,7 +732,7 @@
     let start = -Math.PI / 2;
     const colors = ['#4f17a8', '#00b5d1', '#ff671f', '#86bc86', '#d4a6c8'];
     ctx.fillStyle = '#1b1f2a';
-    ctx.font = '18px Arial';
+    ctx.font = '18px Aptos, Calibri, Tahoma, Arial';
     ctx.fillText(title, 22, 28);
     entries.forEach(([label, value], index) => {
       const angle = value / total * Math.PI * 2;
@@ -736,7 +745,7 @@
       start += angle;
       ctx.fillRect(290, 70 + index * 28, 14, 14);
       ctx.fillStyle = '#1b1f2a';
-      ctx.font = '13px Arial';
+      ctx.font = '13px Aptos, Calibri, Tahoma, Arial';
       ctx.fillText(`${label}: ${value}`, 312, 82 + index * 28);
     });
   }
@@ -776,11 +785,11 @@
       tr.innerHTML = `
         <td>${escapeHtml(profile.email)}</td>
         <td>${escapeHtml(profile.pmiId)}</td>
-        <td>${escapeHtml(profile.gender || '')}</td>
-        <td>${escapeHtml(profile.occupationStatus || '')}</td>
-        <td>${roleText(profile.roles.member)}</td>
-        <td>${roleText(profile.roles.volunteer)}</td>
-        <td><button class="delete-click" type="button" data-delete="${escapeHtml(profile.email)}">Supprimer</button></td>
+        <td>${profile.gender === 'M' ? '👨 M' : profile.gender === 'F' ? '👩 F' : ''}</td>
+        <td>${profile.occupationStatus === 'Etudiant' ? '🎓 Etudiant' : profile.occupationStatus === 'Professionnel' ? '💼 Professionnel' : ''}</td>
+        <td>${roleText(profile.roles.member, '💜')}</td>
+        <td>${roleText(profile.roles.volunteer, '🙋')}</td>
+        <td><button class="delete-click" type="button" data-delete="${escapeHtml(profile.email)}">❌ Supprimer</button></td>
       `;
       body.appendChild(tr);
     });
@@ -794,9 +803,9 @@
     if (!body.children.length) body.innerHTML = '<tr><td colspan="7">Aucun profil.</td></tr>';
   }
 
-  function roleText(role) {
+  function roleText(role, emoji) {
     if (!role.active) return 'Inactif';
-    return `${escapeHtml(role.zoneName)} (${escapeHtml(role.zoneType)})`;
+    return `${emoji} ${escapeHtml(role.zoneName)} (${escapeHtml(role.zoneType)})`;
   }
 
   function periodKey(period, mode) {

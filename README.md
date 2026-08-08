@@ -4,9 +4,9 @@ Application web statique pour cartographier les membres et volontaires du PMI RD
 
 ## Fichiers principaux
 
-- `index.html` : page d'accueil avec carte cliquable, formulaire de pointage et enquete de satisfaction.
+- `index.html` : page d'accueil avec carte cliquable, formulaire de localisation et enquete de satisfaction.
 - `dashboard.html` : dashboard separe protege par mot de passe.
-- `app.js` : logique de pointage, annulation, satisfaction, graphiques et Supabase.
+- `app.js` : logique de localisation, annulation, satisfaction, graphiques et Supabase.
 - `style.css` : charte visuelle inspiree du template PMI RDC 2026.
 - `rdc-provinces-geojson.js` : limites reelles des 26 provinces.
 - `assets/p1_Image6_26195.png` : logo extrait du template fourni.
@@ -30,6 +30,7 @@ Regles appliquees :
 - si elle est deja membre ou deja volontaire, elle ne peut pas choisir directement `Membre et volontaire` plus tard ;
 - elle peut annuler membre, volontaire, ou les deux ;
 - les compteurs par province affichent membres et volontaires.
+- un mini tutoriel explique les etapes directement sur la page.
 
 ## Enquete de satisfaction
 

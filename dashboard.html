@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Dashboard</title>
-  <link rel="stylesheet" href="style.css?v=20260808-2">
+  <link rel="stylesheet" href="style.css?v=20260808-3">
 </head>
 <body>
   <header class="topbar">
@@ -16,7 +16,7 @@
       <p>Statistiques membres, volontaires et satisfaction</p>
     </div>
     <div class="header-actions">
-      <a class="button secondary" href="index.html">Accueil</a>
+      <a class="button secondary" href="index.html">🏠 Accueil</a>
     </div>
   </header>
 
@@ -49,10 +49,10 @@
         <section class="panel kpi-panel">
           <h2>Vue globale</h2>
           <div class="kpis">
-            <div><strong id="kpiMembers">0</strong><span>Membres</span></div>
-            <div><strong id="kpiVolunteers">0</strong><span>Volontaires</span></div>
+            <div><strong id="kpiMembers">0</strong><span>💜 Membres</span></div>
+            <div><strong id="kpiVolunteers">0</strong><span>🙋 Volontaires</span></div>
             <div><strong id="kpiPeople">0</strong><span>Personnes</span></div>
-            <div><strong id="kpiSatisfaction">0.0</strong><span>Satisfaction</span></div>
+            <div><strong id="kpiSatisfaction">0.0</strong><span>⭐ Satisfaction</span></div>
           </div>
           <div class="dashboard-emoji" id="dashboardEmoji">-</div>
         </section>
@@ -62,9 +62,9 @@
         <div class="dashboard-section-header">
           <h2>Histogramme par province</h2>
           <div class="button-row">
-            <button class="button secondary" type="button" id="exportCsv">Exporter CSV</button>
-            <button class="button secondary" type="button" id="exportPng">Exporter PNG</button>
-            <button class="button danger" type="button" id="resetAll">Remise a zero</button>
+            <button class="button secondary" type="button" id="exportCsv">⬇️ Exporter CSV</button>
+            <button class="button secondary" type="button" id="exportPng">🖼️ Exporter PNG</button>
+            <button class="button danger" type="button" id="resetAll">❌ Remise a zero</button>
           </div>
         </div>
         <canvas id="provinceChart" width="1200" height="520"></canvas>
@@ -99,13 +99,13 @@
       </section>
 
       <section class="panel">
-        <h2>Clics et profils</h2>
+        <h2>Localisations et profils</h2>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Email</th><th>PMI ID</th><th>Sexe</th><th>Statut</th>
-                <th>Membre</th><th>Volontaire</th><th>Action</th>
+                <th>📧 Email</th><th>🆔 PMI ID</th><th>👤 Sexe</th><th>🎓💼 Statut</th>
+                <th>💜 Membre</th><th>🙋 Volontaire</th><th>🛠 Action</th>
               </tr>
             </thead>
             <tbody id="profilesBody"></tbody>
@@ -115,9 +115,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260808-2"></script>
-  <script src="rdc-provinces-geojson.js?v=20260808-2"></script>
-  <script src="app.js?v=20260808-2"></script>
+  <script src="supabase-config.js?v=20260808-3"></script>
+  <script src="rdc-provinces-geojson.js?v=20260808-3"></script>
+  <script src="app.js?v=20260808-3"></script>
   <script>
     PMIMapApp.initDashboard();
   </script>

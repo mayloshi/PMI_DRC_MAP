@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Carte des membres et volontaires</title>
-  <link rel="stylesheet" href="style.css?v=20260808-2">
+  <link rel="stylesheet" href="style.css?v=20260808-3">
 </head>
 <body>
   <header class="topbar">
@@ -24,65 +24,76 @@
         <span id="yearMoodEmoji">-</span>
         <strong id="yearMoodScore">Annee 0.0/5</strong>
       </div>
-      <a class="button secondary" href="dashboard.html">Dashboard</a>
+      <a class="button secondary" href="dashboard.html">📊 Dashboard</a>
     </div>
   </header>
 
   <main class="home-grid">
     <aside class="panel form-panel">
+      <section class="mini-tutorial">
+        <h2>📌 Mini tutoriel</h2>
+        <ol>
+          <li>Renseignez votre email, PMI ID, sexe et statut.</li>
+          <li>Choisissez membre, volontaire ou les deux.</li>
+          <li>Cliquez sur votre province ou votre continent hors RDC.</li>
+          <li>Ajoutez votre satisfaction du mois avec les etoiles.</li>
+          <li>Utilisez l'annulation si vous devez retirer un choix.</li>
+        </ol>
+      </section>
+
       <h2>Identification</h2>
       <div class="field">
-        <label for="email">Email</label>
+        <label for="email">📧 Email</label>
         <input id="email" type="email" autocomplete="email" required>
       </div>
       <div class="field">
-        <label for="pmiId">PMI ID</label>
+        <label for="pmiId">🆔 PMI ID</label>
         <input id="pmiId" type="text" autocomplete="off" required>
       </div>
       <div class="two-cols">
         <div class="field">
-          <span class="field-label">Sexe</span>
+          <span class="field-label">👤 Sexe</span>
           <div class="radio-row">
-            <label><input type="radio" name="gender" value="M"> M</label>
-            <label><input type="radio" name="gender" value="F"> F</label>
+            <label><input type="radio" name="gender" value="M"> 👨 M</label>
+            <label><input type="radio" name="gender" value="F"> 👩 F</label>
           </div>
         </div>
         <div class="field">
-          <span class="field-label">Statut</span>
+          <span class="field-label">🎓💼 Statut</span>
           <div class="radio-row">
-            <label><input type="radio" name="occupationStatus" value="Etudiant"> Etudiant</label>
-            <label><input type="radio" name="occupationStatus" value="Professionnel"> Professionnel</label>
+            <label><input type="radio" name="occupationStatus" value="Etudiant"> 🎓 Etudiant</label>
+            <label><input type="radio" name="occupationStatus" value="Professionnel"> 💼 Professionnel</label>
           </div>
         </div>
       </div>
       <button class="button secondary" type="button" id="updateProfileInfo">Mettre a jour sexe/statut</button>
 
-      <h2>Pointage</h2>
+      <h2>📍 Localisation</h2>
       <div class="two-cols">
         <div class="field">
-          <label for="roleChoice">Statut PMI</label>
+          <label for="roleChoice">🤝 Statut PMI</label>
           <select id="roleChoice" required>
             <option value="">Choisir</option>
-            <option value="member">Membre</option>
-            <option value="volunteer">Volontaire</option>
-            <option value="both">Membre et volontaire</option>
+            <option value="member">💜 Membre</option>
+            <option value="volunteer">🙋 Volontaire</option>
+            <option value="both">💜🙋 Membre et volontaire</option>
           </select>
         </div>
         <div class="field">
-          <label for="roleAction">Action</label>
+          <label for="roleAction">🛠 Action</label>
           <select id="roleAction" required>
             <option value="add">Ajouter / mettre a jour</option>
-            <option value="cancel">Annuler</option>
+            <option value="cancel">❌ Annuler</option>
           </select>
         </div>
       </div>
       <p class="note">Cliquez ensuite sur une province ou un continent. Si vous ajoutez un deuxieme role plus tard, la nouvelle province remplace aussi la province du role deja actif.</p>
-      <button class="button secondary" type="button" id="applyCancel">Appliquer une annulation</button>
+      <button class="button secondary" type="button" id="applyCancel">❌ Appliquer une annulation</button>
       <div class="selected-zone" id="selectedZone">Aucune zone selectionnee.</div>
       <div class="status" id="statusBox">Les compteurs se mettent a jour apres chaque operation valide.</div>
 
       <section class="survey-box">
-        <h2>Enquete de satisfaction</h2>
+        <h2>⭐ Enquete de satisfaction</h2>
         <div class="field">
           <label for="surveyMonth">Mois</label>
           <input id="surveyMonth" type="month" disabled>
@@ -95,7 +106,7 @@
           <button type="button" data-rating="5">☆</button>
         </div>
         <textarea id="comment" rows="4" placeholder="Commentaire"></textarea>
-        <button class="button primary" type="button" id="saveSurvey">Enregistrer la satisfaction</button>
+        <button class="button primary" type="button" id="saveSurvey">⭐ Enregistrer la satisfaction</button>
       </section>
     </aside>
 
@@ -104,8 +115,8 @@
         <div class="map-toolbar">
           <h2>RDC - 26 provinces</h2>
           <div class="legend">
-            <span><i class="dot member"></i>Membres</span>
-            <span><i class="dot volunteer"></i>Volontaires</span>
+            <span><i class="dot member"></i>💜 Membres</span>
+            <span><i class="dot volunteer"></i>🙋 Volontaires</span>
           </div>
         </div>
         <div class="map-wrap">
@@ -120,14 +131,14 @@
 
       <div class="side-stack">
         <div class="panel">
-          <h2>Hors RDC</h2>
+          <h2>🌍 Hors RDC</h2>
           <div class="continent-list" id="continentList"></div>
         </div>
         <div class="panel">
           <h2>Total general</h2>
           <div class="totals">
-            <div><strong>Membres</strong><span id="totalMembers">0</span></div>
-            <div><strong>Volontaires</strong><span id="totalVolunteers">0</span></div>
+            <div><strong>💜 Membres</strong><span id="totalMembers">0</span></div>
+            <div><strong>🙋 Volontaires</strong><span id="totalVolunteers">0</span></div>
             <div><strong>Personnes actives</strong><span id="totalUnique">0</span></div>
           </div>
         </div>
@@ -135,9 +146,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260808-2"></script>
-  <script src="rdc-provinces-geojson.js?v=20260808-2"></script>
-  <script src="app.js?v=20260808-2"></script>
+  <script src="supabase-config.js?v=20260808-3"></script>
+  <script src="rdc-provinces-geojson.js?v=20260808-3"></script>
+  <script src="app.js?v=20260808-3"></script>
   <script>
     PMIMapApp.initHome();
   </script>
