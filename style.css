@@ -17,6 +17,7 @@
 body {
   margin: 0;
   font-family: Aptos, Calibri, Tahoma, Arial, sans-serif;
+  font-size: 17.5px;
   background-color: #edf1f7;
   background-image:
     linear-gradient(rgba(237, 241, 247, .92), rgba(237, 241, 247, .92)),
@@ -63,7 +64,7 @@ h1 {
 
 h2 {
   color: #263246;
-  font-size: 17px;
+  font-size: 18.5px;
 }
 
 p {
@@ -84,17 +85,26 @@ p {
 .global-mood {
   min-width: 96px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--soft);
+  gap: 2px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  text-align: center;
 }
 
 .global-mood span {
-  font-size: 24px;
+  font-size: 48px;
+  line-height: 1;
+}
+
+.global-mood strong {
+  display: block;
+  color: var(--pmi-purple);
+  font-size: 13.5px;
+  line-height: 1.15;
 }
 
 .button, button {
@@ -187,7 +197,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
   margin: 9px 0 0;
   padding-left: 20px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.45;
 }
 
@@ -199,7 +209,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
   display: block;
   margin-bottom: 7px;
   color: #29354a;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
 }
 
@@ -236,14 +246,14 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
 .note {
   margin: 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .selected-zone, .status {
   min-height: 42px;
   padding: 11px 12px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.4;
 }
 
@@ -315,7 +325,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
   gap: 12px;
   flex-wrap: wrap;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .legend span {
@@ -366,13 +376,13 @@ svg {
 
 .map-label text {
   fill: #192234;
-  font-size: 10px;
+  font-size: 11.5px;
   font-weight: 700;
 }
 
 .map-label .count {
   fill: #4a5870;
-  font-size: 9px;
+  font-size: 10.5px;
 }
 
 .leader-line {
@@ -386,7 +396,7 @@ svg {
   margin: 0;
   padding: 0 16px 14px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .side-stack {
@@ -415,11 +425,35 @@ svg {
   text-align: left;
 }
 
+.continent-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.continent-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+}
+
+.continent-icon path {
+  fill: #e9f7fb;
+  stroke: var(--pmi-purple);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.continent-icon text {
+  font-size: 15px;
+}
+
 .mini-count {
   display: block;
   margin-top: 4px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .totals {
@@ -488,7 +522,7 @@ svg {
 
 .kpis span {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .dashboard-emoji {
@@ -503,7 +537,7 @@ svg {
   border-radius: 8px;
   background: rgba(255, 255, 255, .92);
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14.5px;
   text-align: center;
 }
 
@@ -537,7 +571,7 @@ canvas {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 th, td {

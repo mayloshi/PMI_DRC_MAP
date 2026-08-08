@@ -11,13 +11,31 @@
     'Oceanie'
   ];
 
-  const continentEmojis = {
-    'Afrique hors RDC': '🌍',
-    Europe: '🇪🇺',
-    'Amerique du Nord': '🌎',
-    'Amerique latine': '🌎',
-    Asie: '🌏',
-    Oceanie: '🌊'
+  const continentIcons = {
+    'Afrique hors RDC': {
+      label: '🌍',
+      path: 'M30 5 C40 12 46 25 44 39 C42 52 35 61 29 74 C24 64 20 56 15 48 C8 38 10 24 18 14 C21 10 25 7 30 5 Z'
+    },
+    Europe: {
+      label: '🇪🇺',
+      path: 'M17 28 L28 17 L42 18 L54 28 L48 40 L33 45 L20 39 Z'
+    },
+    'Amerique du Nord': {
+      label: '🌎',
+      path: 'M10 23 C20 8 42 8 55 19 C62 26 57 39 46 42 C36 45 33 57 22 54 C13 51 6 36 10 23 Z'
+    },
+    'Amerique latine': {
+      label: '🌎',
+      path: 'M28 8 C42 17 45 31 37 42 C34 46 39 53 35 61 C31 70 24 73 20 65 C17 59 22 51 20 43 C18 34 10 31 13 22 C15 15 21 10 28 8 Z'
+    },
+    Asie: {
+      label: '🌏',
+      path: 'M9 23 C18 9 42 6 61 16 C72 22 68 38 55 40 C45 42 42 53 31 56 C19 59 6 42 9 23 Z'
+    },
+    Oceanie: {
+      label: '🌊',
+      path: 'M18 38 C27 28 43 28 52 38 C46 49 25 49 18 38 Z M56 50 C61 46 69 47 72 53 C67 58 60 58 56 50 Z'
+    }
   };
 
   const provinceNameMap = {
@@ -395,21 +413,22 @@
     const left = items.filter(item => item.center[0] < 580).sort((a, b) => a.center[1] - b.center[1]);
     const right = items.filter(item => item.center[0] >= 580).sort((a, b) => a.center[1] - b.center[1]);
     placeLabels(left, 16, labelsRoot);
-    placeLabels(right, 1010, labelsRoot);
+    placeLabels(right, 1148, labelsRoot);
   }
 
   function placeLabels(items, x, labelsRoot) {
     const step = Math.min(56, 730 / Math.max(items.length, 1));
     items.forEach((item, index) => {
       const y = 44 + index * step;
-      const anchorX = x < 580 ? x + 126 : x;
-      const boxX = x < 580 ? x : x - 126;
+      const width = x < 580 ? 126 : 138;
+      const anchorX = x < 580 ? x + width : x - width;
+      const boxX = x < 580 ? x : x - width;
       const line = createSvgElement('path', {
         class: 'leader-line',
         d: `M${item.center[0].toFixed(1)},${item.center[1].toFixed(1)} L${anchorX},${y + 18}`
       });
       const group = createSvgElement('g', { class: 'map-label', 'data-label': item.province.name });
-      const rect = createSvgElement('rect', { x: boxX, y, width: 126, height: 38 });
+      const rect = createSvgElement('rect', { x: boxX, y, width, height: 38 });
       const name = createSvgElement('text', { x: boxX + 8, y: y + 15 });
       name.textContent = shortName(item.province.name);
       const count = createSvgElement('text', { x: boxX + 8, y: y + 30, class: 'count', 'data-zone-count': item.province.name });
@@ -447,10 +466,15 @@
       button.type = 'button';
       button.className = 'continent';
       button.dataset.zone = name;
-      button.innerHTML = `<span><strong>${continentEmojis[name] || '🌍'} ${name}</strong><span class="mini-count" data-continent="${name}">M: 0 | V: 0</span></span><span>Choisir</span>`;
+      button.innerHTML = `<span class="continent-main">${continentIcon(name)}<span><strong>${name}</strong><span class="mini-count" data-continent="${name}">M: 0 | V: 0</span></span></span><span>Choisir</span>`;
       button.addEventListener('click', () => onZoneClick(name, 'Continent'));
       root.appendChild(button);
     });
+  }
+
+  function continentIcon(name) {
+    const icon = continentIcons[name] || continentIcons['Afrique hors RDC'];
+    return `<svg class="continent-icon" viewBox="0 0 80 80" aria-hidden="true"><path d="${icon.path}"></path><text x="58" y="68">${icon.label}</text></svg>`;
   }
 
   async function refreshHome() {
