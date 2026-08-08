@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PMI RDC - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="http://pmi-drcongo.org" target="_blank" rel="noopener">
+      <img src="assets/p1_Image6_26195.png" alt="PMI RDC Chapter">
+    </a>
+    <div class="topbar-title">
+      <h1>Dashboard PMI RDC</h1>
+      <p>Statistiques membres, volontaires et satisfaction</p>
+    </div>
+    <div class="header-actions">
+      <a class="button secondary" href="index.html">Accueil</a>
+    </div>
+  </header>
+
+  <main class="dashboard-page">
+    <section class="panel password-panel" id="passwordPanel">
+      <h2>Acces dashboard</h2>
+      <div class="field">
+        <label for="dashboardPassword">Mot de passe</label>
+        <input id="dashboardPassword" type="password" autocomplete="current-password">
+      </div>
+      <button class="button primary" type="button" id="unlockDashboard">Ouvrir le dashboard</button>
+      <div class="status" id="dashboardStatus">Saisissez le mot de passe pour acceder aux statistiques.</div>
+    </section>
+
+    <section id="dashboardContent" hidden>
+      <div class="dashboard-grid">
+        <section class="panel">
+          <h2>Connexion base de donnees</h2>
+          <div class="field">
+            <label for="supabaseUrl">Supabase URL</label>
+            <input id="supabaseUrl" placeholder="https://votre-projet.supabase.co">
+          </div>
+          <div class="field">
+            <label for="supabaseAnon">Supabase anon key</label>
+            <input id="supabaseAnon" placeholder="eyJ...">
+          </div>
+          <div class="button-row">
+            <button class="button primary" type="button" id="saveDbConfig">Enregistrer</button>
+            <button class="button secondary" type="button" id="clearDbConfig">Vider</button>
+          </div>
+          <p class="note">Cette configuration est stockee dans le navigateur du dashboard. Pour la rendre globale sur GitHub Pages, renseigner aussi `supabase-config.js` dans le depot.</p>
+        </section>
+
+        <section class="panel kpi-panel">
+          <h2>Vue globale</h2>
+          <div class="kpis">
+            <div><strong id="kpiMembers">0</strong><span>Membres</span></div>
+            <div><strong id="kpiVolunteers">0</strong><span>Volontaires</span></div>
+            <div><strong id="kpiPeople">0</strong><span>Personnes</span></div>
+            <div><strong id="kpiSatisfaction">0.0</strong><span>Satisfaction</span></div>
+          </div>
+          <div class="dashboard-emoji" id="dashboardEmoji">-</div>
+        </section>
+      </div>
+
+      <section class="panel">
+        <div class="dashboard-section-header">
+          <h2>Histogramme par province</h2>
+          <div class="button-row">
+            <button class="button secondary" type="button" id="exportCsv">Exporter CSV</button>
+            <button class="button secondary" type="button" id="exportPng">Exporter PNG</button>
+            <button class="button danger" type="button" id="resetAll">Remise a zero</button>
+          </div>
+        </div>
+        <canvas id="provinceChart" width="1200" height="520"></canvas>
+      </section>
+
+      <section class="panel">
+        <h2>Segmentation</h2>
+        <div class="small-charts">
+          <canvas id="genderChart" width="500" height="280"></canvas>
+          <canvas id="occupationChart" width="500" height="280"></canvas>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="dashboard-section-header">
+          <h2>Tableau niko-niko</h2>
+          <div class="button-row">
+            <select id="nikoPeriod">
+              <option value="month">Mensuel</option>
+              <option value="quarter">Trimestriel</option>
+              <option value="year">Annuel</option>
+            </select>
+            <button class="button secondary" type="button" id="refreshDashboard">Actualiser</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Periode</th><th>Moyenne</th><th>Niko-niko</th><th>Commentaires</th></tr></thead>
+            <tbody id="nikoBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Clics et profils</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th><th>PMI ID</th><th>Sexe</th><th>Statut</th>
+                <th>Membre</th><th>Volontaire</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="profilesBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="supabase-config.js"></script>
+  <script src="rdc-provinces-geojson.js"></script>
+  <script src="app.js"></script>
+  <script>
+    PMIMapApp.initDashboard();
+  </script>
+</body>
+</html>

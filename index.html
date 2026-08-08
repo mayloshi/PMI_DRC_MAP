@@ -3,1175 +3,141 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    :root {
-      --pmi: #5f259f;
-      --ink: #172033;
-      --muted: #647084;
-      --line: #d9deea;
-      --panel: #ffffff;
-      --soft: #f4f7fb;
-      --green: #0a8f5c;
-      --yellow: #f4b942;
-      --blue: #2774ae;
-      --red: #cf3f3f;
-    }
-
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #eef2f7;
-      color: var(--ink);
-    }
-
-    header {
-      min-height: 92px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 18px 28px;
-      color: #fff;
-      background: linear-gradient(135deg, var(--pmi), #0070a8);
-    }
-
-    header img {
-      width: 64px;
-      max-height: 64px;
-      object-fit: contain;
-      padding: 8px;
-      border-radius: 8px;
-      background: #fff;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(22px, 3vw, 34px);
-      line-height: 1.1;
-      letter-spacing: 0;
-    }
-
-    .subtitle {
-      margin-top: 6px;
-      color: rgba(255, 255, 255, .88);
-      font-size: 15px;
-    }
-
-    main {
-      display: grid;
-      grid-template-columns: minmax(280px, 390px) minmax(0, 1fr);
-      min-height: calc(100vh - 92px);
-    }
-
-    aside {
-      padding: 22px;
-      background: var(--panel);
-      border-right: 1px solid var(--line);
-    }
-
-    .form-panel {
-      display: grid;
-      gap: 14px;
-    }
-
-    .field label, .choice-label {
-      display: block;
-      margin-bottom: 7px;
-      color: #29354a;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    input, select {
-      width: 100%;
-      height: 44px;
-      padding: 0 12px;
-      border: 1px solid #c6ccda;
-      border-radius: 7px;
-      color: var(--ink);
-      background: #fff;
-      font: inherit;
-    }
-
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .action-button {
-      min-height: 40px;
-      border: 1px solid #c6ccda;
-      border-radius: 7px;
-      background: #fff;
-      color: var(--ink);
-      cursor: pointer;
-      font: inherit;
-      font-weight: 700;
-    }
-
-    .action-button.primary {
-      border-color: var(--blue);
-      background: var(--blue);
-      color: #fff;
-    }
-
-    .action-button.danger {
-      color: #9b1f1f;
-    }
-
-    .admin-login {
-      display: grid;
-      gap: 10px;
-      margin-top: 8px;
-      padding-top: 14px;
-      border-top: 1px solid var(--line);
-    }
-
-    .admin-login h2 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .board {
-      grid-column: 1 / -1;
-      margin: 0 22px 22px;
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .board[hidden] {
-      display: none;
-    }
-
-    .board-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .board-header h2 {
-      margin: 0;
-      font-size: 18px;
-    }
-
-    .board-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .table-wrap {
-      max-height: 360px;
-      overflow: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-
-    th, td {
-      padding: 10px 12px;
-      border-bottom: 1px solid #edf0f6;
-      text-align: left;
-      vertical-align: top;
-      white-space: nowrap;
-    }
-
-    th {
-      position: sticky;
-      top: 0;
-      background: #f7f9fc;
-      color: #29354a;
-      z-index: 1;
-    }
-
-    .delete-click {
-      min-height: 30px;
-      padding: 0 10px;
-      border: 1px solid #efb4b4;
-      border-radius: 6px;
-      background: #fff7f7;
-      color: #9b1f1f;
-      cursor: pointer;
-      font: inherit;
-      font-weight: 700;
-    }
-
-    input:focus, select:focus, button:focus-visible {
-      outline: 3px solid rgba(39, 116, 174, .22);
-      outline-offset: 2px;
-      border-color: var(--blue);
-    }
-
-    .hint {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
-    }
-
-    .identity-state {
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--soft);
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
-    .identity-state strong {
-      display: block;
-      color: var(--ink);
-      margin-bottom: 3px;
-    }
-
-    .map-section {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 260px;
-      gap: 18px;
-      align-items: start;
-      padding: 22px;
-    }
-
-    .map-shell, .continents-panel, .totals-panel {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-    }
-
-    .map-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .map-toolbar h2, .continents-panel h2, .totals-panel h2 {
-      margin: 0;
-      font-size: 16px;
-      letter-spacing: 0;
-    }
-
-    .legend {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .legend span {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      white-space: nowrap;
-    }
-
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .map-wrap {
-      padding: 12px;
-      overflow: auto;
-    }
-
-    svg {
-      width: 100%;
-      min-width: 780px;
-      height: auto;
-      display: block;
-    }
-
-    .province {
-      cursor: pointer;
-      transition: transform .12s ease, filter .12s ease;
-    }
-
-    .province polygon, .province path {
-      stroke: #fff;
-      stroke-width: 2;
-      vector-effect: non-scaling-stroke;
-    }
-
-    .province:hover, .province:focus {
-      filter: brightness(1.05) drop-shadow(0 4px 8px rgba(23, 32, 51, .22));
-      outline: none;
-    }
-
-    .province text {
-      pointer-events: none;
-      text-anchor: middle;
-      fill: #102033;
-      font-weight: 700;
-      font-size: 9px;
-    }
-
-    .province .count-line {
-      font-weight: 700;
-      fill: #32415a;
-      font-size: 8px;
-    }
-
-    .source-note {
-      padding: 0 16px 14px;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.4;
-    }
-
-    .side-stack {
-      display: grid;
-      gap: 18px;
-    }
-
-    .continents-panel, .totals-panel {
-      padding: 16px;
-    }
-
-    .continent-list {
-      display: grid;
-      gap: 9px;
-      margin-top: 14px;
-    }
-
-    .continent {
-      width: 100%;
-      min-height: 62px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
-      border: 1px solid #cbd3e2;
-      border-radius: 8px;
-      background: #f9fbfe;
-      cursor: pointer;
-      text-align: left;
-      font: inherit;
-    }
-
-    .continent:hover {
-      border-color: var(--blue);
-      background: #eef7ff;
-    }
-
-    .continent strong, .total-row strong {
-      display: block;
-      font-size: 13px;
-    }
-
-    .mini-count {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
-    }
-
-    .totals {
-      margin-top: 12px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px solid #edf0f6;
-    }
-
-    .total-row:last-child { border-bottom: 0; }
-
-    .status {
-      min-height: 42px;
-      padding: 11px 12px;
-      border-radius: 8px;
-      background: #eef7ff;
-      color: #214a70;
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
-    .status.error {
-      background: #fff1f1;
-      color: #9b1f1f;
-    }
-
-    .status.success {
-      background: #ecf9f3;
-      color: #146341;
-    }
-
-    .selected-zone {
-      padding: 12px;
-      border-left: 4px solid var(--yellow);
-      background: #fff8e7;
-      border-radius: 7px;
-      color: #5d4308;
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
-    @media (max-width: 980px) {
-      main, .map-section {
-        grid-template-columns: 1fr;
-      }
-      aside {
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
-      }
-      .side-stack {
-        grid-template-columns: 1fr 1fr;
-      }
-      .board {
-        margin: 0 16px 16px;
-      }
-    }
-
-    @media (max-width: 680px) {
-      header {
-        padding: 16px;
-      }
-      aside, .map-section {
-        padding: 16px;
-      }
-      .map-toolbar {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-      .side-stack {
-        grid-template-columns: 1fr;
-      }
-      .board-header {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-      svg {
-        min-width: 720px;
-      }
-    }
-  </style>
+  <title>PMI RDC - Carte des membres et volontaires</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <div>
+  <header class="topbar">
+    <a class="brand" href="http://pmi-drcongo.org" target="_blank" rel="noopener">
+      <img src="assets/p1_Image6_26195.png" alt="PMI RDC Chapter">
+    </a>
+    <div class="topbar-title">
       <h1>Carte des membres et volontaires PMI RDC</h1>
-      <div class="subtitle">PMI RDC Chapter - localisation des membres et volontaires</div>
+      <p>Localisation des membres, volontaires et mesure mensuelle de satisfaction</p>
+    </div>
+    <div class="header-actions">
+      <div class="global-mood" title="Satisfaction globale">
+        <span id="globalMoodEmoji">-</span>
+        <strong id="globalMoodScore">0.0/5</strong>
+      </div>
+      <a class="button secondary" href="dashboard.html">Dashboard</a>
     </div>
   </header>
 
-  <main>
-    <aside>
-      <form class="form-panel" id="identityForm">
+  <main class="home-grid">
+    <aside class="panel form-panel">
+      <h2>Identification</h2>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="pmiId">PMI ID</label>
+        <input id="pmiId" type="text" autocomplete="off" required>
+      </div>
+      <div class="two-cols">
         <div class="field">
-          <label for="email">Email</label>
-          <input id="email" name="email" type="email" autocomplete="email" required>
-          <p class="hint">Un email ne peut etre utilise qu'une seule fois.</p>
-        </div>
-        <div class="field">
-          <label for="pmiId">PMI ID</label>
-          <input id="pmiId" name="pmiId" type="text" autocomplete="off" required>
-          <p class="hint">Un PMI ID ne peut etre utilise qu'une seule fois.</p>
-        </div>
-        <div class="field">
-          <label for="status">Statut</label>
-          <select id="status" name="status" required>
+          <label for="gender">Sexe</label>
+          <select id="gender" required>
             <option value="">Choisir</option>
-            <option>Membre</option>
-            <option>Volontaire</option>
-            <option>Les deux</option>
+            <option>Femme</option>
+            <option>Homme</option>
+            <option>Prefere ne pas dire</option>
           </select>
         </div>
-        <div class="identity-state">
-          <strong>Etape suivante</strong>
-          Completez les champs, puis cliquez sur votre province en RDC ou sur votre continent si vous etes hors RDC.
+        <div class="field">
+          <label for="occupationStatus">Statut</label>
+          <select id="occupationStatus" required>
+            <option value="">Choisir</option>
+            <option>Etudiant</option>
+            <option>Professionnel</option>
+          </select>
         </div>
-        <div class="selected-zone" id="selectedZone">Aucune zone selectionnee.</div>
-        <div class="status" id="statusBox">Les compteurs se mettent a jour apres chaque clic valide.</div>
-        <div class="admin-login" id="adminLogin">
-          <h2>Board</h2>
-          <div class="field">
-            <label for="adminPassword">Mot de passe</label>
-            <input id="adminPassword" type="password" autocomplete="current-password">
-          </div>
-          <button class="action-button primary" type="button" id="unlockBoardButton">Ouvrir le board</button>
+      </div>
+
+      <h2>Pointage</h2>
+      <div class="two-cols">
+        <div class="field">
+          <label for="roleChoice">Statut PMI</label>
+          <select id="roleChoice" required>
+            <option value="">Choisir</option>
+            <option value="member">Membre</option>
+            <option value="volunteer">Volontaire</option>
+            <option value="both">Membre et volontaire</option>
+          </select>
         </div>
-      </form>
+        <div class="field">
+          <label for="roleAction">Action</label>
+          <select id="roleAction" required>
+            <option value="add">Ajouter / mettre a jour</option>
+            <option value="cancel">Annuler</option>
+          </select>
+        </div>
+      </div>
+      <p class="note">Cliquez ensuite sur une province ou un continent. Si vous ajoutez un deuxieme role plus tard, la nouvelle province remplace aussi la province du role deja actif.</p>
+      <button class="button secondary" type="button" id="applyCancel">Appliquer une annulation</button>
+      <div class="selected-zone" id="selectedZone">Aucune zone selectionnee.</div>
+      <div class="status" id="statusBox">Les compteurs se mettent a jour apres chaque operation valide.</div>
+
+      <section class="survey-box">
+        <h2>Enquete de satisfaction</h2>
+        <div class="field">
+          <label for="surveyMonth">Mois</label>
+          <input id="surveyMonth" type="month">
+        </div>
+        <div class="stars" id="stars" aria-label="Satisfaction de 1 a 5 etoiles">
+          <button type="button" data-rating="1">☆</button>
+          <button type="button" data-rating="2">☆</button>
+          <button type="button" data-rating="3">☆</button>
+          <button type="button" data-rating="4">☆</button>
+          <button type="button" data-rating="5">☆</button>
+        </div>
+        <textarea id="comment" rows="4" placeholder="Commentaire"></textarea>
+        <button class="button primary" type="button" id="saveSurvey">Enregistrer la satisfaction</button>
+      </section>
     </aside>
 
     <section class="map-section">
-      <div class="map-shell">
+      <div class="map-shell panel">
         <div class="map-toolbar">
-          <h2>Carte de la RDC - 26 provinces</h2>
+          <h2>RDC - 26 provinces</h2>
           <div class="legend">
-            <span><i class="dot" style="background: var(--green)"></i>Membres</span>
-            <span><i class="dot" style="background: var(--blue)"></i>Volontaires</span>
+            <span><i class="dot member"></i>Membres</span>
+            <span><i class="dot volunteer"></i>Volontaires</span>
           </div>
         </div>
         <div class="map-wrap">
-          <svg viewBox="0 0 960 760" role="img" aria-label="Carte cliquable de la RDC avec les 26 provinces">
-            <rect x="0" y="0" width="960" height="760" fill="#f6f8fc"></rect>
+          <svg viewBox="0 0 1160 820" role="img" aria-label="Carte cliquable de la RDC avec les 26 provinces">
+            <rect x="0" y="0" width="1160" height="820" fill="#f7f9fc"></rect>
             <g id="provinceMap"></g>
+            <g id="provinceLabels"></g>
           </svg>
         </div>
-        <div class="source-note">
-          Limites provinciales : geoBoundaries COD ADM1, source OpenStreetMap/Wambacher, licence ODbL 1.0.
-        </div>
+        <p class="source-note">Limites provinciales : geoBoundaries COD ADM1, source OpenStreetMap/Wambacher, licence ODbL 1.0.</p>
       </div>
 
       <div class="side-stack">
-        <div class="continents-panel">
+        <div class="panel">
           <h2>Hors RDC</h2>
           <div class="continent-list" id="continentList"></div>
         </div>
-        <div class="totals-panel">
+        <div class="panel">
           <h2>Total general</h2>
           <div class="totals">
-            <div class="total-row">
-              <strong>Membres</strong>
-              <span id="totalMembers">0</span>
-            </div>
-            <div class="total-row">
-              <strong>Volontaires</strong>
-              <span id="totalVolunteers">0</span>
-            </div>
-            <div class="total-row">
-              <strong>Pointages uniques</strong>
-              <span id="totalUnique">0</span>
-            </div>
+            <div><strong>Membres</strong><span id="totalMembers">0</span></div>
+            <div><strong>Volontaires</strong><span id="totalVolunteers">0</span></div>
+            <div><strong>Personnes actives</strong><span id="totalUnique">0</span></div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="board" id="boardPanel" hidden>
-      <div class="board-header">
-        <div>
-          <h2>Board des pointages</h2>
-          <div class="hint" id="boardSummary">Aucun pointage.</div>
-        </div>
-        <div class="board-actions">
-          <button class="action-button primary" type="button" id="exportButton">Exporter CSV</button>
-          <button class="action-button" type="button" id="exportPngButton">Exporter PNG</button>
-          <button class="action-button danger" type="button" id="resetButton">Remise a zero</button>
-          <button class="action-button" type="button" id="lockBoardButton">Fermer</button>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Email</th>
-              <th>PMI ID</th>
-              <th>Statut</th>
-              <th>Zone</th>
-              <th>Type</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="clickTableBody">
-            <tr><td colspan="7">Aucun pointage.</td></tr>
-          </tbody>
-        </table>
       </div>
     </section>
   </main>
 
   <script src="supabase-config.js"></script>
   <script src="rdc-provinces-geojson.js"></script>
+  <script src="app.js"></script>
   <script>
-    const STORAGE_KEY = 'pmi-rdc-carte-pointages-v1';
-    const ADMIN_PASSWORD = 'Projectdrc@2026';
-    const initialCounts = {};
-
-    const provinceNameMap = {
-      'Central Kasai': 'Kasai-Central',
-      'Lower Uele': 'Bas-Uele',
-      'North Kivu': 'Nord-Kivu',
-      'South Kivu': 'Sud-Kivu',
-      'Upper Uele': 'Haut-Uele',
-      'Équateur': 'Equateur'
-    };
-
-    const palette = [
-      '#8cc665', '#76b7b2', '#f28e2b', '#e15759', '#59a14f', '#4e79a7',
-      '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac', '#86bc86',
-      '#7aa6c2', '#d4a6c8', '#f1ce63', '#a0cbe8'
-    ];
-
-    const provinces = (window.RDC_PROVINCES_GEOJSON.features || [])
-      .map((feature, index) => ({
-        name: provinceNameMap[feature.properties.shapeName] || feature.properties.shapeName,
-        color: palette[index % palette.length],
-        feature
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    const continents = [
-      'Afrique hors RDC',
-      'Europe',
-      'Amerique du Nord',
-      'Amerique latine',
-      'Asie',
-      'Oceanie'
-    ];
-
-    let counts = initialCounts || {};
-
-    function createSvgElement(name, attrs) {
-      const el = document.createElementNS('http://www.w3.org/2000/svg', name);
-      Object.keys(attrs).forEach(key => el.setAttribute(key, attrs[key]));
-      return el;
-    }
-
-    function buildProvinceMap() {
-      const root = document.getElementById('provinceMap');
-      const projection = createProjection(window.RDC_PROVINCES_GEOJSON);
-      provinces.forEach(province => {
-        const group = createSvgElement('g', { class: 'province', tabindex: '0', role: 'button', 'aria-label': province.name });
-        const shape = createSvgElement('path', { d: featureToPath(province.feature, projection), fill: province.color });
-        const center = featureCenter(province.feature, projection);
-        const label = createSvgElement('text', { x: center[0], y: center[1] - 8 });
-        label.textContent = shortName(province.name);
-        const members = createSvgElement('text', { x: center[0], y: center[1] + 9, class: 'count-line', 'data-members': province.name });
-        const volunteers = createSvgElement('text', { x: center[0], y: center[1] + 23, class: 'count-line', 'data-volunteers': province.name });
-        group.appendChild(shape);
-        group.appendChild(label);
-        group.appendChild(members);
-        group.appendChild(volunteers);
-        group.addEventListener('click', () => submitZone(province.name));
-        group.addEventListener('keydown', event => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            submitZone(province.name);
-          }
-        });
-        root.appendChild(group);
-      });
-    }
-
-    function createProjection(geojson) {
-      const bounds = [Infinity, Infinity, -Infinity, -Infinity];
-      geojson.features.forEach(feature => {
-        eachCoordinate(feature.geometry, coord => {
-          bounds[0] = Math.min(bounds[0], coord[0]);
-          bounds[1] = Math.min(bounds[1], coord[1]);
-          bounds[2] = Math.max(bounds[2], coord[0]);
-          bounds[3] = Math.max(bounds[3], coord[1]);
-        });
-      });
-      const padding = 28;
-      const width = 960 - padding * 2;
-      const height = 760 - padding * 2;
-      const scale = Math.min(width / (bounds[2] - bounds[0]), height / (bounds[3] - bounds[1]));
-      const offsetX = padding + (width - (bounds[2] - bounds[0]) * scale) / 2;
-      const offsetY = padding + (height - (bounds[3] - bounds[1]) * scale) / 2;
-      return coord => [
-        offsetX + (coord[0] - bounds[0]) * scale,
-        offsetY + (bounds[3] - coord[1]) * scale
-      ];
-    }
-
-    function featureToPath(feature, projection) {
-      const polygons = feature.geometry.type === 'Polygon'
-        ? [feature.geometry.coordinates]
-        : feature.geometry.coordinates;
-      return polygons.map(polygon => polygon.map(ring => {
-        return ring.map((coord, index) => {
-          const point = projection(coord);
-          return `${index === 0 ? 'M' : 'L'}${point[0].toFixed(2)},${point[1].toFixed(2)}`;
-        }).join(' ') + ' Z';
-      }).join(' ')).join(' ');
-    }
-
-    function featureCenter(feature, projection) {
-      const bounds = [Infinity, Infinity, -Infinity, -Infinity];
-      eachCoordinate(feature.geometry, coord => {
-        const point = projection(coord);
-        bounds[0] = Math.min(bounds[0], point[0]);
-        bounds[1] = Math.min(bounds[1], point[1]);
-        bounds[2] = Math.max(bounds[2], point[0]);
-        bounds[3] = Math.max(bounds[3], point[1]);
-      });
-      return [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2];
-    }
-
-    function eachCoordinate(geometry, callback) {
-      if (geometry.type === 'Polygon') {
-        geometry.coordinates.forEach(ring => ring.forEach(callback));
-      }
-      if (geometry.type === 'MultiPolygon') {
-        geometry.coordinates.forEach(polygon => polygon.forEach(ring => ring.forEach(callback)));
-      }
-    }
-
-    function buildContinents() {
-      const root = document.getElementById('continentList');
-      continents.forEach(name => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'continent';
-        button.dataset.zone = name;
-        button.innerHTML = `<span><strong>${name}</strong><span class="mini-count" data-continent="${name}">M: 0 | V: 0</span></span><span>Choisir</span>`;
-        button.addEventListener('click', () => submitZone(name));
-        root.appendChild(button);
-      });
-    }
-
-    function shortName(name) {
-      const map = {
-        'Kasai-Central': 'Kasai-C.',
-        'Kasai-Oriental': 'Kasai-O.',
-        'Kongo-Central': 'Kongo-C.',
-        'Haut-Katanga': 'H. Katanga',
-        'Haut-Lomami': 'H. Lomami',
-        'Haut-Uele': 'H. Uele',
-        'Bas-Uele': 'Bas-Uele',
-        'Nord-Kivu': 'N. Kivu',
-        'Sud-Kivu': 'S. Kivu',
-        'Nord-Ubangi': 'N. Ubangi',
-        'Sud-Ubangi': 'S. Ubangi',
-        'Mai-Ndombe': 'Mai-N.'
-      };
-      return map[name] || name;
-    }
-
-    function getIdentity() {
-      const form = document.getElementById('identityForm');
-      if (!form.reportValidity()) return null;
-      const data = Object.fromEntries(new FormData(form).entries());
-      return {
-        email: data.email,
-        pmiId: data.pmiId,
-        status: data.status
-      };
-    }
-
-    async function submitZone(zoneName) {
-      const identity = getIdentity();
-      if (!identity) return;
-      document.getElementById('selectedZone').textContent = `Zone selectionnee : ${zoneName}`;
-      setStatus('Enregistrement en cours...', '');
-
-      const payload = Object.assign({}, identity, { zoneName });
-      try {
-        const result = await submitPresence(payload);
-        counts = result.counts;
-        renderCounts();
-        if (result.ok) {
-          setStatus(result.message, 'success');
-        } else {
-          setStatus(result.message, 'error');
-        }
-      } catch (error) {
-        setStatus(error.message || 'Erreur pendant l enregistrement.', 'error');
-      }
-    }
-
-    async function submitPresence(payload) {
-      if (isSupabaseConfigured()) return submitPresenceSupabase(payload);
-      return submitPresenceLocal(payload);
-    }
-
-    function submitPresenceLocal(payload) {
-      const entries = loadEntries();
-      const email = normalizeEmail(payload.email);
-      const pmiId = normalizePmiId(payload.pmiId);
-      const duplicateEmail = entries.some(entry => normalizeEmail(entry.email) === email);
-      const duplicatePmiId = entries.some(entry => normalizePmiId(entry.pmiId) === pmiId);
-
-      if (duplicateEmail) {
-        return { ok: false, message: 'Cet email a deja ete utilise pour un pointage.', counts: buildCounts(entries) };
-      }
-      if (duplicatePmiId) {
-        return { ok: false, message: 'Ce PMI ID a deja ete utilise pour un pointage.', counts: buildCounts(entries) };
-      }
-
-      entries.push({
-        id: window.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2),
-        timestamp: new Date().toISOString(),
-        email,
-        pmiId,
-        status: payload.status,
-        zoneName: payload.zoneName,
-        zoneType: provinces.some(province => province.name === payload.zoneName) ? 'Province' : 'Continent',
-        memberCount: payload.status === 'Membre' || payload.status === 'Les deux' ? 1 : 0,
-        volunteerCount: payload.status === 'Volontaire' || payload.status === 'Les deux' ? 1 : 0
-      });
-      saveEntries(entries);
-      renderBoard();
-      return { ok: true, message: 'Votre pointage a ete enregistre sur cette page locale.', counts: buildCounts(entries) };
-    }
-
-    async function submitPresenceSupabase(payload) {
-      const entries = await loadSupabaseEntries();
-      const email = normalizeEmail(payload.email);
-      const pmiId = normalizePmiId(payload.pmiId);
-      const duplicateEmail = entries.some(entry => normalizeEmail(entry.email) === email);
-      const duplicatePmiId = entries.some(entry => normalizePmiId(entry.pmiId) === pmiId);
-
-      if (duplicateEmail) {
-        return { ok: false, message: 'Cet email a deja ete utilise pour un pointage.', counts: buildCounts(entries) };
-      }
-      if (duplicatePmiId) {
-        return { ok: false, message: 'Ce PMI ID a deja ete utilise pour un pointage.', counts: buildCounts(entries) };
-      }
-
-      const entry = {
-        email,
-        pmi_id: pmiId,
-        status: payload.status,
-        zone_name: payload.zoneName,
-        zone_type: provinces.some(province => province.name === payload.zoneName) ? 'Province' : 'Continent',
-        member_count: payload.status === 'Membre' || payload.status === 'Les deux' ? 1 : 0,
-        volunteer_count: payload.status === 'Volontaire' || payload.status === 'Les deux' ? 1 : 0
-      };
-      const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_clicks`, {
-        method: 'POST',
-        headers: Object.assign({}, supabaseHeaders(), { Prefer: 'return=representation' }),
-        body: JSON.stringify(entry)
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        if (response.status === 409 || text.includes('duplicate')) {
-          return { ok: false, message: 'Cet email ou ce PMI ID a deja ete utilise pour un pointage.', counts: buildCounts(entries) };
-        }
-        throw new Error('Supabase a refuse l enregistrement.');
-      }
-      const refreshed = await loadSupabaseEntries();
-      saveEntries(refreshed);
-      renderBoard();
-      return { ok: true, message: 'Votre pointage a ete enregistre dans Supabase.', counts: buildCounts(refreshed) };
-    }
-
-    function renderCounts() {
-      let totalMembers = 0;
-      let totalVolunteers = 0;
-      let totalUnique = 0;
-      Object.keys(counts).forEach(name => {
-        const item = counts[name] || { members: 0, volunteers: 0, responses: 0 };
-        totalMembers += Number(item.members || 0);
-        totalVolunteers += Number(item.volunteers || 0);
-        totalUnique += Number(item.responses || 0);
-        const memberLabel = document.querySelector(`[data-members="${cssEscape(name)}"]`);
-        const volunteerLabel = document.querySelector(`[data-volunteers="${cssEscape(name)}"]`);
-        if (memberLabel) memberLabel.textContent = `M: ${item.members || 0}`;
-        if (volunteerLabel) volunteerLabel.textContent = `V: ${item.volunteers || 0}`;
-        const continentLabel = document.querySelector(`[data-continent="${cssEscape(name)}"]`);
-        if (continentLabel) continentLabel.textContent = `M: ${item.members || 0} | V: ${item.volunteers || 0}`;
-      });
-      document.getElementById('totalMembers').textContent = totalMembers;
-      document.getElementById('totalVolunteers').textContent = totalVolunteers;
-      document.getElementById('totalUnique').textContent = totalUnique;
-    }
-
-    function buildCounts(entries) {
-      const zones = {};
-      provinces.forEach(province => {
-        zones[province.name] = { type: 'province', members: 0, volunteers: 0, responses: 0 };
-      });
-      continents.forEach(name => {
-        zones[name] = { type: 'continent', members: 0, volunteers: 0, responses: 0 };
-      });
-      entries.forEach(entry => {
-        if (!zones[entry.zoneName]) return;
-        zones[entry.zoneName].members += Number(entry.memberCount || 0);
-        zones[entry.zoneName].volunteers += Number(entry.volunteerCount || 0);
-        zones[entry.zoneName].responses += 1;
-      });
-      return zones;
-    }
-
-    function loadEntries() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      } catch (error) {
-        return [];
-      }
-    }
-
-    async function loadCurrentEntries() {
-      if (!isSupabaseConfigured()) return loadEntries();
-      const entries = await loadSupabaseEntries();
-      saveEntries(entries);
-      return entries;
-    }
-
-    async function loadSupabaseEntries() {
-      const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_clicks?select=*&order=created_at.asc`, {
-        headers: supabaseHeaders()
-      });
-      if (!response.ok) throw new Error('Impossible de lire les donnees Supabase.');
-      const rows = await response.json();
-      return rows.map(row => ({
-        id: row.id,
-        timestamp: row.created_at,
-        email: row.email,
-        pmiId: row.pmi_id,
-        status: row.status,
-        zoneType: row.zone_type,
-        zoneName: row.zone_name,
-        memberCount: row.member_count,
-        volunteerCount: row.volunteer_count
-      }));
-    }
-
-    function saveEntries(entries) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-    }
-
-    function normalizeEmail(value) {
-      return String(value || '').trim().toLowerCase();
-    }
-
-    function normalizePmiId(value) {
-      return String(value || '').trim().toUpperCase().replace(/\s+/g, '');
-    }
-
-    async function exportCsv() {
-      const entries = await loadCurrentEntries();
-      const rows = [
-        ['Horodatage', 'Email', 'PMI ID', 'Statut', 'Type de zone', 'Province ou continent', 'Membre compte', 'Volontaire compte'],
-        ...entries.map(entry => [
-          entry.timestamp,
-          entry.email,
-          entry.pmiId,
-          entry.status,
-          entry.zoneType,
-          entry.zoneName,
-          entry.memberCount,
-          entry.volunteerCount
-        ])
-      ];
-      const csv = rows.map(row => row.map(csvCell).join(',')).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `PMI_RDC_pointages_${new Date().toISOString().slice(0, 10)}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    }
-
-    function exportPng() {
-      const svg = document.querySelector('svg');
-      const clone = svg.cloneNode(true);
-      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      const sourceNote = 'Source: geoBoundaries COD ADM1 / OpenStreetMap-Wambacher / ODbL 1.0';
-      const note = createSvgElement('text', { x: 28, y: 748, fill: '#647084', 'font-size': '12' });
-      note.textContent = sourceNote;
-      clone.appendChild(note);
-      const xml = new XMLSerializer().serializeToString(clone);
-      const svgBlob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(svgBlob);
-      const image = new Image();
-      image.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 960;
-        canvas.height = 760;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#f6f8fc';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(image, 0, 0);
-        URL.revokeObjectURL(url);
-        const pngUrl = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = pngUrl;
-        link.download = `PMI_RDC_carte_${new Date().toISOString().slice(0, 10)}.png`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      };
-      image.src = url;
-    }
-
-    function csvCell(value) {
-      return `"${String(value ?? '').replace(/"/g, '""')}"`;
-    }
-
-    async function resetLocalData() {
-      const ok = confirm('Effacer tous les pointages enregistres ?');
-      if (!ok) return;
-      if (isSupabaseConfigured()) {
-        const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_clicks?id=not.is.null`, {
-          method: 'DELETE',
-          headers: supabaseHeaders()
-        });
-        if (!response.ok) {
-          setStatus('La remise a zero Supabase a echoue.', 'error');
-          return;
-        }
-      }
-      localStorage.removeItem(STORAGE_KEY);
-      counts = buildCounts([]);
-      renderCounts();
-      renderBoard();
-      setStatus('Les pointages ont ete effaces.', 'success');
-    }
-
-    function unlockBoard() {
-      const password = document.getElementById('adminPassword').value;
-      if (password !== ADMIN_PASSWORD) {
-        setStatus('Mot de passe board incorrect.', 'error');
-        return;
-      }
-      document.getElementById('boardPanel').hidden = false;
-      document.getElementById('adminPassword').value = '';
-      renderBoard();
-      setStatus('Board ouvert.', 'success');
-    }
-
-    function lockBoard() {
-      document.getElementById('boardPanel').hidden = true;
-      setStatus('Board ferme.', '');
-    }
-
-    async function renderBoard() {
-      const board = document.getElementById('boardPanel');
-      if (board.hidden) return;
-      let entries = loadEntries();
-      if (isSupabaseConfigured()) {
-        try {
-          entries = await loadCurrentEntries();
-        } catch (error) {
-          setStatus(error.message, 'error');
-        }
-      }
-      const body = document.getElementById('clickTableBody');
-      document.getElementById('boardSummary').textContent = `${entries.length} pointage(s) enregistres.`;
-      if (!entries.length) {
-        body.innerHTML = '<tr><td colspan="7">Aucun pointage.</td></tr>';
-        return;
-      }
-      body.innerHTML = '';
-      entries.slice().reverse().forEach(entry => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${formatDate(entry.timestamp)}</td>
-          <td>${escapeHtml(entry.email)}</td>
-          <td>${escapeHtml(entry.pmiId)}</td>
-          <td>${escapeHtml(entry.status)}</td>
-          <td>${escapeHtml(entry.zoneName)}</td>
-          <td>${escapeHtml(entry.zoneType)}</td>
-          <td><button class="delete-click" type="button" data-delete-id="${entry.id}">Supprimer</button></td>
-        `;
-        body.appendChild(tr);
-      });
-      body.querySelectorAll('[data-delete-id]').forEach(button => {
-        button.addEventListener('click', () => deleteClick(button.dataset.deleteId));
-      });
-    }
-
-    async function deleteClick(id) {
-      const entries = await loadCurrentEntries();
-      const entry = entries.find(item => item.id === id);
-      if (!entry) return;
-      const ok = confirm(`Supprimer le pointage de ${entry.email} ?`);
-      if (!ok) return;
-      if (isSupabaseConfigured()) {
-        const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_clicks?id=eq.${encodeURIComponent(id)}`, {
-          method: 'DELETE',
-          headers: supabaseHeaders()
-        });
-        if (!response.ok) {
-          setStatus('La suppression Supabase a echoue.', 'error');
-          return;
-        }
-      }
-      const remaining = entries.filter(item => item.id !== id);
-      saveEntries(remaining);
-      counts = buildCounts(remaining);
-      renderCounts();
-      renderBoard();
-      setStatus('Le pointage selectionne a ete supprime.', 'success');
-    }
-
-    function formatDate(value) {
-      if (!value) return '';
-      return new Date(value).toLocaleString('fr-FR');
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    function isSupabaseConfigured() {
-      return Boolean(window.PMI_DRC_SUPABASE && window.PMI_DRC_SUPABASE.url && window.PMI_DRC_SUPABASE.anonKey);
-    }
-
-    function supabaseUrl() {
-      return window.PMI_DRC_SUPABASE.url.replace(/\/$/, '');
-    }
-
-    function supabaseHeaders() {
-      return {
-        apikey: window.PMI_DRC_SUPABASE.anonKey,
-        Authorization: `Bearer ${window.PMI_DRC_SUPABASE.anonKey}`,
-        'Content-Type': 'application/json'
-      };
-    }
-
-    async function initializeData() {
-      try {
-        const entries = await loadCurrentEntries();
-        counts = buildCounts(entries);
-        renderCounts();
-        if (isSupabaseConfigured()) setStatus('Connexion Supabase active.', 'success');
-      } catch (error) {
-        counts = buildCounts(loadEntries());
-        renderCounts();
-        setStatus(`${error.message} Mode local utilise.`, 'error');
-      }
-    }
-
-    function cssEscape(value) {
-      if (window.CSS && CSS.escape) return CSS.escape(value);
-      return String(value).replace(/"/g, '\\"');
-    }
-
-    function setStatus(message, type) {
-      const box = document.getElementById('statusBox');
-      box.className = `status ${type || ''}`;
-      box.textContent = message;
-    }
-
-    function disableForm() {
-      document.querySelectorAll('#identityForm input, #identityForm select').forEach(field => {
-        field.disabled = true;
-      });
-    }
-
-    buildProvinceMap();
-    buildContinents();
-    initializeData();
-    document.getElementById('unlockBoardButton').addEventListener('click', unlockBoard);
-    document.getElementById('lockBoardButton').addEventListener('click', lockBoard);
-    document.getElementById('exportButton').addEventListener('click', exportCsv);
-    document.getElementById('exportPngButton').addEventListener('click', exportPng);
-    document.getElementById('resetButton').addEventListener('click', resetLocalData);
+    PMIMapApp.initHome();
   </script>
 </body>
 </html>
