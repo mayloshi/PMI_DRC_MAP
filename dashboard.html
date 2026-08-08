@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Dashboard</title>
-  <link rel="stylesheet" href="style.css?v=20260808-8">
+  <link rel="stylesheet" href="style.css?v=20260809-1">
 </head>
 <body>
   <header class="topbar">
@@ -46,8 +46,9 @@
           <div class="button-row">
             <button class="button secondary" type="button" id="downloadConfig">Generer supabase-config.js</button>
           </div>
+          <div class="status" id="dbConnectionStatus"></div>
           <textarea id="configPreview" rows="5" readonly></textarea>
-          <p class="note">Les valeurs affichees viennent de `supabase-config.js` si elles y figurent deja. Une page statique ne peut pas ecrire directement dans ce fichier : ce bouton genere le fichier a publier.</p>
+          <p class="note">Les champs et le contenu ci-dessus viennent de `supabase-config.js` si le fichier est publie. Une page statique ne peut pas ecrire directement dans ce fichier : ce bouton genere le fichier a publier.</p>
         </section>
 
         <section class="panel kpi-panel">
@@ -138,9 +139,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260808-8"></script>
-  <script src="rdc-provinces-geojson.js?v=20260808-8"></script>
-  <script src="app.js?v=20260808-8"></script>
+  <script src="supabase-config.js?v=20260809-1"></script>
+  <script src="rdc-provinces-geojson.js?v=20260809-1"></script>
+  <script src="app.js?v=20260809-1"></script>
   <script>
     PMIMapApp.initDashboard();
   </script>

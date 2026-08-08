@@ -77,12 +77,22 @@
     };
   }
 
+  async function supabaseError(response, fallback) {
+    let detail = '';
+    try {
+      detail = await response.text();
+    } catch (error) {
+      detail = '';
+    }
+    return `${fallback} Code ${response.status}.${detail ? ` Detail: ${detail}` : ''}`;
+  }
+
   async function loadProfiles() {
     if (!isSupabaseConfigured()) return readJson(PROFILE_KEY, []);
     const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_profiles?select=*&order=updated_at.asc`, {
       headers: supabaseHeaders()
     });
-    if (!response.ok) throw new Error('Impossible de lire les profils Supabase.');
+    if (!response.ok) throw new Error(await supabaseError(response, 'Impossible de lire les profils Supabase.'));
     const rows = await response.json();
     const profiles = rows.map(rowToProfile);
     writeJson(PROFILE_KEY, profiles);
@@ -90,11 +100,14 @@
   }
 
   async function saveProfiles(profiles) {
-    writeJson(PROFILE_KEY, profiles);
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      writeJson(PROFILE_KEY, profiles);
+      return;
+    }
     for (const profile of profiles) {
       await upsertProfile(profile);
     }
+    writeJson(PROFILE_KEY, profiles);
   }
 
   async function upsertProfile(profile) {
@@ -104,38 +117,50 @@
       headers: Object.assign({}, supabaseHeaders(), { Prefer: 'resolution=merge-duplicates' }),
       body: JSON.stringify(body)
     });
-    if (!response.ok) throw new Error('Supabase a refuse la mise a jour du profil.');
+    if (!response.ok) throw new Error(await supabaseError(response, 'Supabase a refuse la mise a jour du profil.'));
   }
 
   async function deleteProfile(email) {
     const profiles = (await loadProfiles()).filter(profile => profile.email !== email);
-    writeJson(PROFILE_KEY, profiles);
-    if (!isSupabaseConfigured()) return profiles;
+    if (!isSupabaseConfigured()) {
+      writeJson(PROFILE_KEY, profiles);
+      return profiles;
+    }
     const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_profiles?email=eq.${encodeURIComponent(email)}`, {
       method: 'DELETE',
       headers: supabaseHeaders()
     });
-    if (!response.ok) throw new Error('La suppression Supabase a echoue.');
+    if (!response.ok) throw new Error(await supabaseError(response, 'La suppression Supabase a echoue.'));
+    writeJson(PROFILE_KEY, profiles);
     return profiles;
   }
 
   async function resetAllData() {
+    if (!isSupabaseConfigured()) {
+      localStorage.removeItem(PROFILE_KEY);
+      localStorage.removeItem(SAT_KEY);
+      return;
+    }
+    const headers = supabaseHeaders();
+    const satisfactionResponse = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?id=not.is.null`, { method: 'DELETE', headers });
+    if (!satisfactionResponse.ok) throw new Error(await supabaseError(satisfactionResponse, 'La suppression des satisfactions Supabase a echoue.'));
+    const profileResponse = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_profiles?id=not.is.null`, { method: 'DELETE', headers });
+    if (!profileResponse.ok) throw new Error(await supabaseError(profileResponse, 'La suppression des profils Supabase a echoue.'));
     localStorage.removeItem(PROFILE_KEY);
     localStorage.removeItem(SAT_KEY);
-    if (!isSupabaseConfigured()) return;
-    const headers = supabaseHeaders();
-    await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?id=not.is.null`, { method: 'DELETE', headers });
-    await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_profiles?id=not.is.null`, { method: 'DELETE', headers });
   }
 
   async function resetSatisfactionData() {
-    localStorage.removeItem(SAT_KEY);
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      localStorage.removeItem(SAT_KEY);
+      return;
+    }
     const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?id=not.is.null`, {
       method: 'DELETE',
       headers: supabaseHeaders()
     });
-    if (!response.ok) throw new Error('La remise a zero des satisfactions Supabase a echoue.');
+    if (!response.ok) throw new Error(await supabaseError(response, 'La remise a zero des satisfactions Supabase a echoue.'));
+    localStorage.removeItem(SAT_KEY);
   }
 
   async function loadSatisfaction() {
@@ -143,7 +168,7 @@
     const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?select=*&order=period.asc`, {
       headers: supabaseHeaders()
     });
-    if (!response.ok) throw new Error('Impossible de lire la satisfaction Supabase.');
+    if (!response.ok) throw new Error(await supabaseError(response, 'Impossible de lire la satisfaction Supabase.'));
     const rows = await response.json();
     const items = rows.map(row => ({
       id: row.id,
@@ -159,12 +184,6 @@
   }
 
   async function saveSatisfaction(item) {
-    const items = readJson(SAT_KEY, []);
-    const index = items.findIndex(existing => existing.email === item.email && existing.period === item.period);
-    if (index >= 0) items[index] = Object.assign({}, items[index], item);
-    else items.push(item);
-    writeJson(SAT_KEY, items);
-    if (!isSupabaseConfigured()) return;
     const row = {
       email: item.email,
       pmi_id: item.pmiId,
@@ -172,12 +191,19 @@
       rating: item.rating,
       comment: item.comment || ''
     };
-    const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?on_conflict=email,period`, {
-      method: 'POST',
-      headers: Object.assign({}, supabaseHeaders(), { Prefer: 'resolution=merge-duplicates' }),
-      body: JSON.stringify(row)
-    });
-    if (!response.ok) throw new Error('Supabase a refuse la satisfaction.');
+    if (isSupabaseConfigured()) {
+      const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?on_conflict=email,period`, {
+        method: 'POST',
+        headers: Object.assign({}, supabaseHeaders(), { Prefer: 'resolution=merge-duplicates' }),
+        body: JSON.stringify(row)
+      });
+      if (!response.ok) throw new Error(await supabaseError(response, 'Supabase a refuse la satisfaction.'));
+    }
+    const items = readJson(SAT_KEY, []);
+    const index = items.findIndex(existing => existing.email === item.email && existing.period === item.period);
+    if (index >= 0) items[index] = Object.assign({}, items[index], item);
+    else items.push(item);
+    writeJson(SAT_KEY, items);
   }
 
   async function loadLogs() {
@@ -844,7 +870,7 @@
       await logAction('dashboard acces', { details: 'Mot de passe valide.' });
       document.getElementById('passwordPanel').hidden = true;
       document.getElementById('dashboardContent').hidden = false;
-      loadDbConfigFields();
+      await loadDbConfigFields();
       bindDashboardActions();
       await refreshDashboard();
     });
@@ -886,11 +912,12 @@
     });
   }
 
-  function loadDbConfigFields() {
+  async function loadDbConfigFields() {
     const cfg = supabaseConfig();
     document.getElementById('supabaseUrl').value = cfg.url;
     document.getElementById('supabaseAnon').value = cfg.anonKey;
-    refreshConfigPreview();
+    await loadConfigFilePreview();
+    await updateDbConnectionStatus();
   }
 
   function refreshConfigPreview() {
@@ -902,12 +929,47 @@
     );
   }
 
+  async function loadConfigFilePreview() {
+    const box = document.getElementById('configPreview');
+    if (!box) return;
+    try {
+      const response = await fetch(`supabase-config.js?read=${Date.now()}`, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`Code ${response.status}`);
+      box.value = await response.text();
+    } catch (error) {
+      refreshConfigPreview();
+    }
+  }
+
+  async function updateDbConnectionStatus() {
+    const box = document.getElementById('dbConnectionStatus');
+    if (!box) return;
+    if (!isSupabaseConfigured()) {
+      box.className = 'status error';
+      box.textContent = 'Base non configuree : les donnees restent dans ce navigateur et ne sont pas partagees.';
+      return;
+    }
+    try {
+      const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?select=id&limit=1`, {
+        headers: supabaseHeaders(),
+        cache: 'no-store'
+      });
+      if (!response.ok) throw new Error(await supabaseError(response, 'Lecture test Supabase impossible.'));
+      box.className = 'status success';
+      box.textContent = 'Base configuree : la page lit et ecrit dans Supabase.';
+    } catch (error) {
+      box.className = 'status error';
+      box.textContent = error.message;
+    }
+  }
+
   function downloadSupabaseConfig() {
     const url = document.getElementById('supabaseUrl').value.trim();
     const anonKey = document.getElementById('supabaseAnon').value.trim();
     if (!window.PMI_DRC_CONFIG) window.PMI_DRC_CONFIG = {};
     window.PMI_DRC_CONFIG.supabase = { url, anonKey };
     refreshConfigPreview();
+    updateDbConnectionStatus();
     downloadText(configFileContent(url, anonKey), 'supabase-config.js', 'application/javascript;charset=utf-8');
     logAction('configuration supabase', { details: `Fichier config genere. URL: ${url || 'vide'}.` }).catch(() => {});
     setDashboardStatus('Fichier supabase-config.js genere. Publiez ce fichier pour appliquer la configuration a tous les navigateurs.', 'success');
