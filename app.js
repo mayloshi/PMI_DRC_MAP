@@ -1,6 +1,7 @@
 (function () {
   const PROFILE_KEY = 'pmi-rdc-map-profiles-v2';
   const SAT_KEY = 'pmi-rdc-map-satisfaction-v1';
+  const LOG_KEY = 'pmi-rdc-map-logs-v1';
 
   const continents = [
     'Afrique hors RDC',
@@ -13,28 +14,28 @@
 
   const continentIcons = {
     'Afrique hors RDC': {
-      label: '🌍',
-      path: 'M30 5 C40 12 46 25 44 39 C42 52 35 61 29 74 C24 64 20 56 15 48 C8 38 10 24 18 14 C21 10 25 7 30 5 Z'
+      source: 'Wikimedia/OpenClipart style Africa outline',
+      path: 'M48 5 L58 10 L64 20 L62 32 L72 43 L68 54 L60 58 L55 72 L47 93 L39 76 L28 63 L23 49 L16 40 L20 24 L31 11 Z'
     },
     Europe: {
-      label: '🇪🇺',
-      path: 'M17 28 L28 17 L42 18 L54 28 L48 40 L33 45 L20 39 Z'
+      source: 'Wikimedia/OpenClipart style Europe outline',
+      path: 'M17 42 L25 29 L38 22 L50 27 L61 20 L73 31 L67 44 L54 47 L43 56 L30 51 Z'
     },
     'Amerique du Nord': {
-      label: '🌎',
-      path: 'M10 23 C20 8 42 8 55 19 C62 26 57 39 46 42 C36 45 33 57 22 54 C13 51 6 36 10 23 Z'
+      source: 'Wikimedia/OpenClipart style North America outline',
+      path: 'M9 28 L21 13 L44 8 L66 18 L82 33 L75 48 L58 50 L50 63 L35 60 L29 48 L14 43 Z'
     },
     'Amerique latine': {
-      label: '🌎',
-      path: 'M28 8 C42 17 45 31 37 42 C34 46 39 53 35 61 C31 70 24 73 20 65 C17 59 22 51 20 43 C18 34 10 31 13 22 C15 15 21 10 28 8 Z'
+      source: 'Wikimedia/OpenClipart style South America outline',
+      path: 'M42 7 L56 18 L59 34 L52 48 L56 62 L47 80 L36 95 L29 76 L23 59 L30 43 L22 30 L30 16 Z'
     },
     Asie: {
-      label: '🌏',
-      path: 'M9 23 C18 9 42 6 61 16 C72 22 68 38 55 40 C45 42 42 53 31 56 C19 59 6 42 9 23 Z'
+      source: 'Wikimedia/OpenClipart style Asia outline',
+      path: 'M8 32 L23 13 L45 8 L66 15 L89 33 L77 47 L88 61 L66 64 L54 82 L36 69 L20 57 Z'
     },
     Oceanie: {
-      label: '🌊',
-      path: 'M18 38 C27 28 43 28 52 38 C46 49 25 49 18 38 Z M56 50 C61 46 69 47 72 53 C67 58 60 58 56 50 Z'
+      source: 'Wikimedia/OpenClipart style Oceania outline',
+      path: 'M18 56 L29 43 L47 45 L59 56 L48 69 L28 67 Z M65 66 L75 61 L84 68 L76 75 Z M55 36 L61 31 L68 36 L62 42 Z'
     }
   };
 
@@ -195,6 +196,78 @@
       body: JSON.stringify(row)
     });
     if (!response.ok) throw new Error('Supabase a refuse la satisfaction.');
+  }
+
+  async function loadLogs() {
+    if (!isSupabaseConfigured()) return readJson(LOG_KEY, []);
+    const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_logs?select=*&order=created_at.desc&limit=300`, {
+      headers: supabaseHeaders()
+    });
+    if (!response.ok) {
+      const cached = readJson(LOG_KEY, []);
+      return cached.length ? cached : [];
+    }
+    const rows = await response.json();
+    const logs = rows.map(row => ({
+      id: row.id,
+      timestamp: row.created_at,
+      action: row.action,
+      email: row.email || '',
+      pmiId: row.pmi_id || '',
+      details: row.details || '',
+      browserLocation: row.browser_location || '',
+      page: row.page || ''
+    }));
+    writeJson(LOG_KEY, logs);
+    return logs;
+  }
+
+  async function logAction(action, options) {
+    const opts = options || {};
+    const item = {
+      id: cryptoId(),
+      timestamp: new Date().toISOString(),
+      action,
+      email: normalizeEmail(opts.email || ''),
+      pmiId: normalizePmiId(opts.pmiId || ''),
+      details: opts.details || '',
+      browserLocation: await browserLocationText(),
+      page: window.location.href
+    };
+    const logs = readJson(LOG_KEY, []);
+    logs.unshift(item);
+    writeJson(LOG_KEY, logs.slice(0, 500));
+    if (!isSupabaseConfigured()) return;
+    const row = {
+      id: item.id,
+      created_at: item.timestamp,
+      action: item.action,
+      email: item.email || null,
+      pmi_id: item.pmiId || null,
+      details: item.details,
+      browser_location: item.browserLocation,
+      page: item.page
+    };
+    const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_logs`, {
+      method: 'POST',
+      headers: supabaseHeaders(),
+      body: JSON.stringify(row)
+    });
+    if (!response.ok) return;
+  }
+
+  function browserLocationText() {
+    if (!navigator.geolocation) return Promise.resolve('Geolocalisation navigateur non disponible');
+    return new Promise(resolve => {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const coords = position.coords;
+          resolve(`lat ${coords.latitude.toFixed(5)}, lon ${coords.longitude.toFixed(5)}, precision ${Math.round(coords.accuracy)} m`);
+        },
+        error => resolve(`Geolocalisation non disponible: ${error.message}`),
+        { enableHighAccuracy: false, timeout: 2500, maximumAge: 300000 }
+      );
+    });
   }
 
   function profileToRow(profile) {
@@ -484,7 +557,7 @@
 
   function continentIcon(name) {
     const icon = continentIcons[name] || continentIcons['Afrique hors RDC'];
-    return `<svg class="continent-icon" viewBox="0 0 80 80" aria-hidden="true"><path d="${icon.path}"></path><text x="58" y="68">${icon.label}</text></svg>`;
+    return `<svg class="continent-icon" viewBox="0 0 100 100" aria-hidden="true" role="img"><path d="${icon.path}"></path></svg>`;
   }
 
   async function refreshHome() {
@@ -667,6 +740,11 @@
       const result = applyRoleOperation(profile, roleChoice, action, zoneName, zoneType);
       if (!result.ok) throw new Error(result.message);
       await saveProfiles(profiles);
+      await logAction('localisation', {
+        email: profile.email,
+        pmiId: profile.pmiId,
+        details: `${result.message} Zone: ${zoneName} (${zoneType}). Choix: ${roleChoice}.`
+      });
       await refreshHome();
       setStatus(result.message, 'success');
     } catch (error) {
@@ -688,6 +766,11 @@
       const result = applyRoleOperation(profile, roleChoice, 'cancel', '', '');
       if (!result.ok) throw new Error(result.message);
       await saveProfiles(profiles);
+      await logAction('annulation', {
+        email: profile.email,
+        pmiId: profile.pmiId,
+        details: `${result.message} Choix: ${roleChoice}.`
+      });
       await refreshHome();
       setStatus(result.message, 'success');
     } catch (error) {
@@ -706,6 +789,11 @@
       profile.gender = identity.gender;
       profile.occupationStatus = identity.occupationStatus;
       await saveProfiles(profiles);
+      await logAction('mise a jour profil', {
+        email: profile.email,
+        pmiId: profile.pmiId,
+        details: `Sexe: ${profile.gender}. Statut: ${profile.occupationStatus}.`
+      });
       await refreshHome();
       setStatus('Sexe/statut mis a jour.', 'success');
     } catch (error) {
@@ -751,6 +839,11 @@
           comment: document.getElementById('comment').value.trim(),
           createdAt: new Date().toISOString()
         });
+        await logAction('satisfaction', {
+          email: identity.email,
+          pmiId: identity.pmiId,
+          details: `Periode: ${period}. Note: ${rating}/5.`
+        });
         await refreshHome();
         setStatus('Satisfaction mensuelle enregistree.', 'success');
       } catch (error) {
@@ -771,6 +864,7 @@
         return;
       }
       setDashboardStatus('', '');
+      await logAction('dashboard acces', { details: 'Mot de passe valide.' });
       document.getElementById('passwordPanel').hidden = true;
       document.getElementById('dashboardContent').hidden = false;
       loadDbConfigFields();
@@ -787,20 +881,29 @@
     window.dashboardActionsBound = true;
     document.getElementById('refreshDashboard').addEventListener('click', refreshDashboard);
     document.getElementById('nikoPeriod').addEventListener('change', refreshDashboard);
-    document.getElementById('exportCsv').addEventListener('click', exportCsv);
-    document.getElementById('exportPng').addEventListener('click', exportPng);
+    document.getElementById('exportCsv').addEventListener('click', async () => {
+      await logAction('export csv', { details: 'Export dashboard CSV.' });
+      await exportCsv();
+    });
+    document.getElementById('exportPng').addEventListener('click', async () => {
+      await logAction('export png', { details: 'Export histogramme PNG.' });
+      exportPng();
+    });
     document.getElementById('downloadConfig').addEventListener('click', downloadSupabaseConfig);
     document.getElementById('supabaseUrl').addEventListener('input', refreshConfigPreview);
     document.getElementById('supabaseAnon').addEventListener('input', refreshConfigPreview);
+    document.getElementById('refreshLogs').addEventListener('click', renderLogs);
     document.getElementById('resetSatisfaction').addEventListener('click', async () => {
       if (!confirm('Effacer toutes les satisfactions uniquement ?')) return;
       await resetSatisfactionData();
+      await logAction('remise a zero satisfactions', { details: 'Toutes les satisfactions ont ete effacees.' });
       await refreshDashboard();
       setDashboardStatus('Satisfactions remises a zero.', 'success');
     });
     document.getElementById('resetAll').addEventListener('click', async () => {
       if (!confirm('Effacer tous les profils et toutes les satisfactions ?')) return;
       await resetAllData();
+      await logAction('remise a zero generale', { details: 'Profils et satisfactions effaces. Logs conserves.' });
       await refreshDashboard();
       setDashboardStatus('Donnees effacees.', 'success');
     });
@@ -829,6 +932,7 @@
     window.PMI_DRC_CONFIG.supabase = { url, anonKey };
     refreshConfigPreview();
     downloadText(configFileContent(url, anonKey), 'supabase-config.js', 'application/javascript;charset=utf-8');
+    logAction('configuration supabase', { details: `Fichier config genere. URL: ${url || 'vide'}.` }).catch(() => {});
     setDashboardStatus('Fichier supabase-config.js genere. Publiez ce fichier pour appliquer la configuration a tous les navigateurs.', 'success');
   }
 
@@ -853,6 +957,7 @@
       drawPieChart('occupationChart', countBy(profiles, 'occupationStatus'), 'Etudiant / Professionnel');
       renderNiko(satisfaction);
       renderProfiles(profiles);
+      await renderLogs();
     } catch (error) {
       setDashboardStatus(error.message, 'error');
     }
@@ -970,10 +1075,31 @@
       button.addEventListener('click', async () => {
         if (!confirm(`Supprimer ${button.dataset.delete} ?`)) return;
         await deleteProfile(button.dataset.delete);
+        await logAction('suppression profil', { email: button.dataset.delete, details: 'Profil supprime depuis le dashboard.' });
         await refreshDashboard();
       });
     });
     if (!body.children.length) body.innerHTML = '<tr><td colspan="7">Aucun profil.</td></tr>';
+  }
+
+  async function renderLogs() {
+    const body = document.getElementById('logsBody');
+    if (!body) return;
+    const logs = await loadLogs();
+    body.innerHTML = '';
+    logs.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(formatDateTime(item.timestamp))}</td>
+        <td>${escapeHtml(item.action)}</td>
+        <td>${escapeHtml(item.email || '')}</td>
+        <td>${escapeHtml(item.pmiId || '')}</td>
+        <td>${escapeHtml(item.browserLocation || '')}</td>
+        <td>${escapeHtml(item.details || '')}</td>
+      `;
+      body.appendChild(tr);
+    });
+    if (!body.children.length) body.innerHTML = '<tr><td colspan="6">Aucune action journalisee.</td></tr>';
   }
 
   function roleText(role, emoji) {
@@ -1112,6 +1238,13 @@
 
   function today() {
     return new Date().toISOString().slice(0, 10);
+  }
+
+  function formatDateTime(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleString('fr-FR');
   }
 
   function currentPeriod() {

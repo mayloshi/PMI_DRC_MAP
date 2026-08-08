@@ -37,8 +37,20 @@ create table if not exists public.pmi_drc_map_satisfaction (
 create unique index if not exists pmi_drc_map_satisfaction_email_period_unique
   on public.pmi_drc_map_satisfaction (email, period);
 
+create table if not exists public.pmi_drc_map_logs (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  action text not null,
+  email text,
+  pmi_id text,
+  details text,
+  browser_location text,
+  page text
+);
+
 alter table public.pmi_drc_map_profiles enable row level security;
 alter table public.pmi_drc_map_satisfaction enable row level security;
+alter table public.pmi_drc_map_logs enable row level security;
 
 drop policy if exists "Public read profiles" on public.pmi_drc_map_profiles;
 create policy "Public read profiles"
@@ -89,6 +101,18 @@ create policy "Public delete satisfaction"
   on public.pmi_drc_map_satisfaction
   for delete
   using (true);
+
+drop policy if exists "Public read logs" on public.pmi_drc_map_logs;
+create policy "Public read logs"
+  on public.pmi_drc_map_logs
+  for select
+  using (true);
+
+drop policy if exists "Public insert logs" on public.pmi_drc_map_logs;
+create policy "Public insert logs"
+  on public.pmi_drc_map_logs
+  for insert
+  with check (action <> '');
 
 -- Ces politiques sont ouvertes pour permettre au prototype statique GitHub Pages
 -- de lire/ecrire/supprimer via la cle anon. Pour une version publique durable,

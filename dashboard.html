@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Dashboard</title>
-  <link rel="stylesheet" href="style.css?v=20260808-6">
+  <link rel="stylesheet" href="style.css?v=20260808-7">
 </head>
 <body>
   <header class="topbar">
@@ -117,12 +117,30 @@
           </table>
         </div>
       </section>
+
+      <section class="panel">
+        <div class="dashboard-section-header">
+          <h2>Log des actions</h2>
+          <button class="button secondary" type="button" id="refreshLogs">Actualiser le log</button>
+        </div>
+        <div class="table-wrap log-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th><th>Action</th><th>Email</th><th>PMI ID</th>
+                <th>Localisation navigateur</th><th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="logsBody"></tbody>
+          </table>
+        </div>
+      </section>
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260808-6"></script>
-  <script src="rdc-provinces-geojson.js?v=20260808-6"></script>
-  <script src="app.js?v=20260808-6"></script>
+  <script src="supabase-config.js?v=20260808-7"></script>
+  <script src="rdc-provinces-geojson.js?v=20260808-7"></script>
+  <script src="app.js?v=20260808-7"></script>
   <script>
     PMIMapApp.initDashboard();
   </script>

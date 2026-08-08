@@ -56,6 +56,7 @@ Fonctions :
 - statistiques par sexe ;
 - statistiques Etudiant / Professionnel ;
 - tableau niko-niko ;
+- log des actions avec timestamp, details et localisation navigateur quand elle est autorisee ;
 - export CSV ;
 - export PNG de l'histogramme ;
 - suppression d'un profil ;
@@ -76,7 +77,7 @@ Ces parametres sont lus depuis le fichier config, donc ils sont identiques pour 
 
 1. Creer un projet Supabase.
 2. Ouvrir `SQL Editor`.
-3. Executer le contenu de `supabase-schema.sql`.
+3. Executer le contenu de `supabase-schema.sql`, y compris la table `pmi_drc_map_logs`.
 4. Renseigner `supabase-config.js` avec l'URL du projet et la cle `anon public`.
 5. Pousser la modification sur GitHub.
 

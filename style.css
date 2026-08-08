@@ -439,28 +439,28 @@ svg {
 }
 
 .continent-icon {
-  width: 42px;
+  width: 48px;
   min-width: 0;
-  height: 42px;
+  height: 48px;
   display: block;
-  flex: 0 0 42px;
+  flex: 0 0 48px;
 }
 
 svg.continent-icon {
-  width: 42px;
+  width: 48px;
   min-width: 0;
-  height: 42px;
+  height: 48px;
 }
 
 .continent-icon path {
-  fill: #e9f7fb;
+  fill: #dff5fb;
   stroke: var(--pmi-purple);
-  stroke-width: 3;
+  stroke-width: 4;
   stroke-linejoin: round;
 }
 
-.continent-icon text {
-  font-size: 15px;
+.log-table-wrap {
+  max-height: 460px;
 }
 
 #configPreview {
