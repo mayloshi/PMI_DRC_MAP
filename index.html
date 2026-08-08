@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Carte des membres et volontaires</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20260808-2">
 </head>
 <body>
   <header class="topbar">
@@ -16,9 +16,13 @@
       <p>Localisation des membres, volontaires et mesure mensuelle de satisfaction</p>
     </div>
     <div class="header-actions">
-      <div class="global-mood" title="Satisfaction globale">
-        <span id="globalMoodEmoji">-</span>
-        <strong id="globalMoodScore">0.0/5</strong>
+      <div class="global-mood" title="Satisfaction du mois courant">
+        <span id="monthMoodEmoji">-</span>
+        <strong id="monthMoodScore">Mois 0.0/5</strong>
+      </div>
+      <div class="global-mood" title="Satisfaction depuis le debut de l'annee">
+        <span id="yearMoodEmoji">-</span>
+        <strong id="yearMoodScore">Annee 0.0/5</strong>
       </div>
       <a class="button secondary" href="dashboard.html">Dashboard</a>
     </div>
@@ -37,23 +41,21 @@
       </div>
       <div class="two-cols">
         <div class="field">
-          <label for="gender">Sexe</label>
-          <select id="gender" required>
-            <option value="">Choisir</option>
-            <option>Femme</option>
-            <option>Homme</option>
-            <option>Prefere ne pas dire</option>
-          </select>
+          <span class="field-label">Sexe</span>
+          <div class="radio-row">
+            <label><input type="radio" name="gender" value="M"> M</label>
+            <label><input type="radio" name="gender" value="F"> F</label>
+          </div>
         </div>
         <div class="field">
-          <label for="occupationStatus">Statut</label>
-          <select id="occupationStatus" required>
-            <option value="">Choisir</option>
-            <option>Etudiant</option>
-            <option>Professionnel</option>
-          </select>
+          <span class="field-label">Statut</span>
+          <div class="radio-row">
+            <label><input type="radio" name="occupationStatus" value="Etudiant"> Etudiant</label>
+            <label><input type="radio" name="occupationStatus" value="Professionnel"> Professionnel</label>
+          </div>
         </div>
       </div>
+      <button class="button secondary" type="button" id="updateProfileInfo">Mettre a jour sexe/statut</button>
 
       <h2>Pointage</h2>
       <div class="two-cols">
@@ -83,7 +85,7 @@
         <h2>Enquete de satisfaction</h2>
         <div class="field">
           <label for="surveyMonth">Mois</label>
-          <input id="surveyMonth" type="month">
+          <input id="surveyMonth" type="month" disabled>
         </div>
         <div class="stars" id="stars" aria-label="Satisfaction de 1 a 5 etoiles">
           <button type="button" data-rating="1">☆</button>
@@ -133,11 +135,12 @@
     </section>
   </main>
 
-  <script src="supabase-config.js"></script>
-  <script src="rdc-provinces-geojson.js"></script>
-  <script src="app.js"></script>
+  <script src="supabase-config.js?v=20260808-2"></script>
+  <script src="rdc-provinces-geojson.js?v=20260808-2"></script>
+  <script src="app.js?v=20260808-2"></script>
   <script>
     PMIMapApp.initHome();
   </script>
+  <footer class="site-footer">Copyright Chapitre PMI RDC - Aout 2026</footer>
 </body>
 </html>

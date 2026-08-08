@@ -1,8 +1,6 @@
 (function () {
-  const ADMIN_PASSWORD = 'Projectdrc@2026';
   const PROFILE_KEY = 'pmi-rdc-map-profiles-v2';
   const SAT_KEY = 'pmi-rdc-map-satisfaction-v1';
-  const DB_CONFIG_KEY = 'pmi-rdc-map-supabase-config-v1';
 
   const continents = [
     'Afrique hors RDC',
@@ -39,12 +37,16 @@
   }
 
   function supabaseConfig() {
-    const local = readJson(DB_CONFIG_KEY, null);
-    const staticConfig = window.PMI_DRC_SUPABASE || {};
+    const appConfig = window.PMI_DRC_CONFIG || {};
+    const staticConfig = appConfig.supabase || {};
     return {
-      url: (local && local.url) || staticConfig.url || '',
-      anonKey: (local && local.anonKey) || staticConfig.anonKey || ''
+      url: staticConfig.url || '',
+      anonKey: staticConfig.anonKey || ''
     };
+  }
+
+  function dashboardPassword() {
+    return (window.PMI_DRC_CONFIG && window.PMI_DRC_CONFIG.dashboardPassword) || '';
   }
 
   function isSupabaseConfigured() {
@@ -465,22 +467,30 @@
   }
 
   function renderGlobalMood(items) {
-    const avg = average(items.map(item => item.rating));
-    setText('globalMoodScore', `${avg.toFixed(1)}/5`);
-    setText('globalMoodEmoji', moodEmoji(avg));
+    const month = currentPeriod();
+    const year = month.slice(0, 4);
+    const monthAvg = average(items.filter(item => item.period === month).map(item => item.rating));
+    const yearAvg = average(items.filter(item => item.period && item.period.slice(0, 4) === year).map(item => item.rating));
+    setText('monthMoodScore', `Mois ${monthAvg.toFixed(1)}/5`);
+    setText('monthMoodEmoji', moodEmoji(monthAvg));
+    setText('yearMoodScore', `Annee ${yearAvg.toFixed(1)}/5`);
+    setText('yearMoodEmoji', moodEmoji(yearAvg));
   }
 
   function readIdentity() {
     const identity = {
       email: document.getElementById('email').value,
       pmiId: document.getElementById('pmiId').value,
-      gender: document.getElementById('gender').value,
-      occupationStatus: document.getElementById('occupationStatus').value
+      gender: checkedValue('gender'),
+      occupationStatus: checkedValue('occupationStatus')
     };
-    if (!identity.email || !identity.pmiId || !identity.gender || !identity.occupationStatus) {
-      throw new Error('Completez email, PMI ID, sexe et statut.');
+    if (!identity.email && !identity.pmiId) {
+      throw new Error('Renseignez au moins email ou PMI ID.');
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identity.email)) throw new Error('Email invalide.');
+    if (!identity.gender || !identity.occupationStatus) {
+      throw new Error('Completez sexe et statut.');
+    }
+    if (identity.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identity.email)) throw new Error('Email invalide.');
     return identity;
   }
 
@@ -496,10 +506,11 @@
       const profiles = await loadProfiles();
       const email = normalizeEmail(identity.email);
       const pmiId = normalizePmiId(identity.pmiId);
-      let profile = profiles.find(item => item.email === email || item.pmiId === pmiId);
-      if (profile && profile.email !== email) throw new Error('Ce PMI ID est deja associe a un autre email.');
-      if (profile && profile.pmiId !== pmiId) throw new Error('Cet email est deja associe a un autre PMI ID.');
+      let profile = profiles.find(item => (email && item.email === email) || (pmiId && item.pmiId === pmiId));
+      if (profile && email && profile.email !== email) throw new Error('Ce PMI ID est deja associe a un autre email.');
+      if (profile && pmiId && profile.pmiId !== pmiId) throw new Error('Cet email est deja associe a un autre PMI ID.');
       if (!profile) {
+        if (!email || !pmiId) throw new Error('Pour un premier pointage, renseignez email et PMI ID.');
         profile = blankProfile(identity);
         profiles.push(profile);
       }
@@ -522,15 +533,33 @@
       const profiles = await loadProfiles();
       const email = normalizeEmail(identity.email);
       const pmiId = normalizePmiId(identity.pmiId);
-      const profile = profiles.find(item => item.email === email || item.pmiId === pmiId);
+      const profile = profiles.find(item => (email && item.email === email) || (pmiId && item.pmiId === pmiId));
       if (!profile) throw new Error('Aucun pointage trouve pour cet email ou ce PMI ID.');
-      if (profile.email !== email) throw new Error('Ce PMI ID est associe a un autre email.');
-      if (profile.pmiId !== pmiId) throw new Error('Cet email est associe a un autre PMI ID.');
+      if (email && profile.email !== email) throw new Error('Ce PMI ID est associe a un autre email.');
+      if (pmiId && profile.pmiId !== pmiId) throw new Error('Cet email est associe a un autre PMI ID.');
       const result = applyRoleOperation(profile, roleChoice, 'cancel', '', '');
       if (!result.ok) throw new Error(result.message);
       await saveProfiles(profiles);
       await refreshHome();
       setStatus(result.message, 'success');
+    } catch (error) {
+      setStatus(error.message, 'error');
+    }
+  }
+
+  async function updateProfileInfo() {
+    try {
+      const identity = readIdentity();
+      const profiles = await loadProfiles();
+      const email = normalizeEmail(identity.email);
+      const pmiId = normalizePmiId(identity.pmiId);
+      const profile = profiles.find(item => (email && item.email === email) || (pmiId && item.pmiId === pmiId));
+      if (!profile) throw new Error('Aucun profil trouve pour cet email ou ce PMI ID.');
+      profile.gender = identity.gender;
+      profile.occupationStatus = identity.occupationStatus;
+      await saveProfiles(profiles);
+      await refreshHome();
+      setStatus('Sexe/statut mis a jour.', 'success');
     } catch (error) {
       setStatus(error.message, 'error');
     }
@@ -545,7 +574,7 @@
         buttons.forEach(item => {
           const active = Number(item.dataset.rating) <= rating;
           item.classList.toggle('active', active);
-          item.textContent = active ? '★' : '☆';
+          item.textContent = active ? '\u2605' : '\u2606';
         });
       });
     });
@@ -554,16 +583,17 @@
 
   async function initHome() {
     const month = document.getElementById('surveyMonth');
-    if (month) month.value = new Date().toISOString().slice(0, 7);
+    if (month) month.value = currentPeriod();
     initMap(handleZone);
     initContinents(handleZone);
     const getRating = setupStars();
     document.getElementById('saveSurvey').addEventListener('click', async () => {
       try {
         const identity = readIdentity();
+        if (!identity.email || !identity.pmiId) throw new Error('Pour la satisfaction, renseignez email et PMI ID.');
         const rating = getRating();
         if (!rating) throw new Error('Choisissez une note de satisfaction de 1 a 5.');
-        const period = document.getElementById('surveyMonth').value || new Date().toISOString().slice(0, 7);
+        const period = currentPeriod();
         await saveSatisfaction({
           id: cryptoId(),
           email: normalizeEmail(identity.email),
@@ -580,6 +610,7 @@
       }
     });
     document.getElementById('applyCancel').addEventListener('click', handleCancel);
+    document.getElementById('updateProfileInfo').addEventListener('click', updateProfileInfo);
     await refreshHome();
   }
 
@@ -587,7 +618,7 @@
     const password = document.getElementById('dashboardPassword');
     const unlock = document.getElementById('unlockDashboard');
     unlock.addEventListener('click', async () => {
-      if (password.value !== ADMIN_PASSWORD) {
+      if (password.value !== dashboardPassword()) {
         setDashboardStatus('Mot de passe incorrect.', 'error');
         return;
       }
@@ -605,20 +636,6 @@
   function bindDashboardActions() {
     if (window.dashboardActionsBound) return;
     window.dashboardActionsBound = true;
-    document.getElementById('saveDbConfig').addEventListener('click', async () => {
-      writeJson(DB_CONFIG_KEY, {
-        url: document.getElementById('supabaseUrl').value.trim(),
-        anonKey: document.getElementById('supabaseAnon').value.trim()
-      });
-      setDashboardStatus('Configuration Supabase enregistree dans ce navigateur.', 'success');
-      await refreshDashboard();
-    });
-    document.getElementById('clearDbConfig').addEventListener('click', async () => {
-      localStorage.removeItem(DB_CONFIG_KEY);
-      loadDbConfigFields();
-      setDashboardStatus('Configuration Supabase locale videe.', 'success');
-      await refreshDashboard();
-    });
     document.getElementById('refreshDashboard').addEventListener('click', refreshDashboard);
     document.getElementById('nikoPeriod').addEventListener('change', refreshDashboard);
     document.getElementById('exportCsv').addEventListener('click', exportCsv);
@@ -831,11 +848,11 @@
 
   function moodEmoji(avg) {
     if (!avg) return '-';
-    if (avg < 2) return '😟';
-    if (avg < 3) return '😐';
-    if (avg < 4) return '🙂';
-    if (avg < 4.5) return '😊';
-    return '😄';
+    if (avg < 2) return '\u{1f61f}';
+    if (avg < 3) return '\u{1f610}';
+    if (avg < 4) return '\u{1f642}';
+    if (avg < 4.5) return '\u{1f60a}';
+    return '\u{1f604}';
   }
 
   function normalizeEmail(value) {
@@ -913,6 +930,14 @@
 
   function today() {
     return new Date().toISOString().slice(0, 10);
+  }
+
+  function currentPeriod() {
+    return new Date().toISOString().slice(0, 7);
+  }
+
+  function checkedValue(name) {
+    return document.querySelector(`input[name="${name}"]:checked`)?.value || '';
   }
 
   window.PMIMapApp = {

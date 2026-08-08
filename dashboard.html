@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20260808-2">
 </head>
 <body>
   <header class="topbar">
@@ -37,17 +37,13 @@
           <h2>Connexion base de donnees</h2>
           <div class="field">
             <label for="supabaseUrl">Supabase URL</label>
-            <input id="supabaseUrl" placeholder="https://votre-projet.supabase.co">
+            <input id="supabaseUrl" placeholder="https://votre-projet.supabase.co" readonly>
           </div>
           <div class="field">
             <label for="supabaseAnon">Supabase anon key</label>
-            <input id="supabaseAnon" placeholder="eyJ...">
+            <input id="supabaseAnon" placeholder="eyJ..." readonly>
           </div>
-          <div class="button-row">
-            <button class="button primary" type="button" id="saveDbConfig">Enregistrer</button>
-            <button class="button secondary" type="button" id="clearDbConfig">Vider</button>
-          </div>
-          <p class="note">Cette configuration est stockee dans le navigateur du dashboard. Pour la rendre globale sur GitHub Pages, renseigner aussi `supabase-config.js` dans le depot.</p>
+          <p class="note">Ces parametres sont lus depuis `supabase-config.js` pour rester identiques dans tous les navigateurs.</p>
         </section>
 
         <section class="panel kpi-panel">
@@ -119,11 +115,12 @@
     </section>
   </main>
 
-  <script src="supabase-config.js"></script>
-  <script src="rdc-provinces-geojson.js"></script>
-  <script src="app.js"></script>
+  <script src="supabase-config.js?v=20260808-2"></script>
+  <script src="rdc-provinces-geojson.js?v=20260808-2"></script>
+  <script src="app.js?v=20260808-2"></script>
   <script>
     PMIMapApp.initDashboard();
   </script>
+  <footer class="site-footer">Copyright Chapitre PMI RDC - Aout 2026</footer>
 </body>
 </html>

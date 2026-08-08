@@ -6,7 +6,7 @@ create table if not exists public.pmi_drc_map_profiles (
   updated_at timestamptz not null default now(),
   email text not null,
   pmi_id text not null,
-  gender text,
+  gender text check (gender in ('M', 'F') or gender is null),
   occupation_status text check (occupation_status in ('Etudiant', 'Professionnel') or occupation_status is null),
   member_active boolean not null default false,
   member_zone_name text,

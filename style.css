@@ -17,7 +17,14 @@
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
-  background: #edf1f7;
+  background-color: #edf1f7;
+  background-image:
+    linear-gradient(rgba(237, 241, 247, .92), rgba(237, 241, 247, .92)),
+    url("assets/p1_Image6_26195.png");
+  background-size: auto, 520px auto;
+  background-position: center top, center 140px;
+  background-repeat: repeat, repeat;
+  background-attachment: fixed;
   color: var(--pmi-ink);
 }
 
@@ -168,12 +175,36 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
   padding: 18px;
 }
 
-.field label {
+.field label, .field-label {
   display: block;
   margin-bottom: 7px;
   color: #29354a;
   font-size: 13px;
   font-weight: 700;
+}
+
+.radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.radio-row label {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #c6ccda;
+  border-radius: 7px;
+  background: #fff;
+  font-weight: 700;
+}
+
+.radio-row input {
+  width: auto;
+  height: auto;
 }
 
 .two-cols {
@@ -443,6 +474,17 @@ svg {
 .dashboard-emoji {
   margin-top: 14px;
   font-size: 48px;
+}
+
+.site-footer {
+  margin: 12px 18px 18px;
+  padding: 14px 18px;
+  border-top: 4px solid var(--pmi-orange);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .92);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
 }
 
 .button-row {

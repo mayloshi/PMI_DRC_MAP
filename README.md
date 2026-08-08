@@ -11,7 +11,7 @@ Application web statique pour cartographier les membres et volontaires du PMI RD
 - `rdc-provinces-geojson.js` : limites reelles des 26 provinces.
 - `assets/p1_Image6_26195.png` : logo extrait du template fourni.
 - `supabase-schema.sql` : schema de base de donnees.
-- `supabase-config.js` : configuration publique Supabase.
+- `supabase-config.js` : configuration publique Supabase et mot de passe dashboard.
 
 ## Accueil
 
@@ -19,7 +19,7 @@ La page permet a une personne de renseigner :
 
 - email ;
 - PMI ID ;
-- sexe ;
+- sexe : M ou F ;
 - statut : Etudiant ou Professionnel ;
 - statut PMI : Membre, Volontaire, ou Membre et volontaire.
 
@@ -38,9 +38,10 @@ Chaque personne peut donner une note mensuelle de 1 a 5 etoiles et ajouter un co
 - un tableau niko-niko mensuel ;
 - un tableau niko-niko trimestriel ;
 - un tableau niko-niko annuel ;
-- un emoji global base sur la moyenne de satisfaction.
+- un emoji du mois courant ;
+- un emoji depuis le debut de l'annee.
 
-L'emoji global apparait aussi sur la page d'accueil.
+Ces emojis apparaissent aussi sur la page d'accueil et sont recalcules apres chaque enregistrement de satisfaction.
 
 ## Dashboard
 
@@ -60,6 +61,16 @@ Fonctions :
 - remise a zero ;
 - configuration locale de la connexion Supabase.
 
+## Configuration
+
+Modifier `supabase-config.js` pour changer :
+
+- le mot de passe du dashboard ;
+- l'URL Supabase ;
+- la cle `anon public`.
+
+Ces parametres sont lus depuis le fichier config, donc ils sont identiques pour tous les navigateurs apres publication GitHub.
+
 ## Supabase
 
 1. Creer un projet Supabase.
@@ -67,8 +78,6 @@ Fonctions :
 3. Executer le contenu de `supabase-schema.sql`.
 4. Renseigner `supabase-config.js` avec l'URL du projet et la cle `anon public`.
 5. Pousser la modification sur GitHub.
-
-Le dashboard permet aussi de saisir l'URL et la cle anon dans le navigateur courant, mais cette configuration locale ne remplace pas `supabase-config.js` pour tous les visiteurs.
 
 Attention : le mot de passe du dashboard est visible dans le code HTML/JS, et les politiques Supabase sont ouvertes pour permettre au site statique de fonctionner. Pour une version publique durable, remplacer les actions admin par une Edge Function protegee cote serveur.
 
