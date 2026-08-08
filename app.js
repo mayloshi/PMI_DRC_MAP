@@ -145,6 +145,16 @@
     await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_profiles?id=not.is.null`, { method: 'DELETE', headers });
   }
 
+  async function resetSatisfactionData() {
+    localStorage.removeItem(SAT_KEY);
+    if (!isSupabaseConfigured()) return;
+    const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?id=not.is.null`, {
+      method: 'DELETE',
+      headers: supabaseHeaders()
+    });
+    if (!response.ok) throw new Error('La remise a zero des satisfactions Supabase a echoue.');
+  }
+
   async function loadSatisfaction() {
     if (!isSupabaseConfigured()) return readJson(SAT_KEY, []);
     const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?select=*&order=period.asc`, {
@@ -760,6 +770,7 @@
         setDashboardStatus('Mot de passe incorrect.', 'error');
         return;
       }
+      setDashboardStatus('', '');
       document.getElementById('passwordPanel').hidden = true;
       document.getElementById('dashboardContent').hidden = false;
       loadDbConfigFields();
@@ -778,6 +789,15 @@
     document.getElementById('nikoPeriod').addEventListener('change', refreshDashboard);
     document.getElementById('exportCsv').addEventListener('click', exportCsv);
     document.getElementById('exportPng').addEventListener('click', exportPng);
+    document.getElementById('downloadConfig').addEventListener('click', downloadSupabaseConfig);
+    document.getElementById('supabaseUrl').addEventListener('input', refreshConfigPreview);
+    document.getElementById('supabaseAnon').addEventListener('input', refreshConfigPreview);
+    document.getElementById('resetSatisfaction').addEventListener('click', async () => {
+      if (!confirm('Effacer toutes les satisfactions uniquement ?')) return;
+      await resetSatisfactionData();
+      await refreshDashboard();
+      setDashboardStatus('Satisfactions remises a zero.', 'success');
+    });
     document.getElementById('resetAll').addEventListener('click', async () => {
       if (!confirm('Effacer tous les profils et toutes les satisfactions ?')) return;
       await resetAllData();
@@ -790,6 +810,30 @@
     const cfg = supabaseConfig();
     document.getElementById('supabaseUrl').value = cfg.url;
     document.getElementById('supabaseAnon').value = cfg.anonKey;
+    refreshConfigPreview();
+  }
+
+  function refreshConfigPreview() {
+    const box = document.getElementById('configPreview');
+    if (!box) return;
+    box.value = configFileContent(
+      document.getElementById('supabaseUrl').value.trim(),
+      document.getElementById('supabaseAnon').value.trim()
+    );
+  }
+
+  function downloadSupabaseConfig() {
+    const url = document.getElementById('supabaseUrl').value.trim();
+    const anonKey = document.getElementById('supabaseAnon').value.trim();
+    if (!window.PMI_DRC_CONFIG) window.PMI_DRC_CONFIG = {};
+    window.PMI_DRC_CONFIG.supabase = { url, anonKey };
+    refreshConfigPreview();
+    downloadText(configFileContent(url, anonKey), 'supabase-config.js', 'application/javascript;charset=utf-8');
+    setDashboardStatus('Fichier supabase-config.js genere. Publiez ce fichier pour appliquer la configuration a tous les navigateurs.', 'success');
+  }
+
+  function configFileContent(url, anonKey) {
+    return `window.PMI_DRC_CONFIG = {\n  dashboardPassword: ${JSON.stringify(dashboardPassword())},\n  supabase: {\n    url: ${JSON.stringify(url)},\n    anonKey: ${JSON.stringify(anonKey)}\n  }\n};\n`;
   }
 
   async function refreshDashboard() {

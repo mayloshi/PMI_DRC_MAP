@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Dashboard</title>
-  <link rel="stylesheet" href="style.css?v=20260808-5">
+  <link rel="stylesheet" href="style.css?v=20260808-6">
 </head>
 <body>
   <header class="topbar">
@@ -37,13 +37,17 @@
           <h2>Connexion base de donnees</h2>
           <div class="field">
             <label for="supabaseUrl">Supabase URL</label>
-            <input id="supabaseUrl" placeholder="https://votre-projet.supabase.co" readonly>
+            <input id="supabaseUrl" placeholder="https://votre-projet.supabase.co">
           </div>
           <div class="field">
             <label for="supabaseAnon">Supabase anon key</label>
-            <input id="supabaseAnon" placeholder="eyJ..." readonly>
+            <input id="supabaseAnon" placeholder="eyJ...">
           </div>
-          <p class="note">Ces parametres sont lus depuis `supabase-config.js` pour rester identiques dans tous les navigateurs.</p>
+          <div class="button-row">
+            <button class="button secondary" type="button" id="downloadConfig">Generer supabase-config.js</button>
+          </div>
+          <textarea id="configPreview" rows="5" readonly></textarea>
+          <p class="note">Les valeurs affichees viennent de `supabase-config.js` si elles y figurent deja. Une page statique ne peut pas ecrire directement dans ce fichier : ce bouton genere le fichier a publier.</p>
         </section>
 
         <section class="panel kpi-panel">
@@ -64,6 +68,7 @@
           <div class="button-row">
             <button class="button secondary" type="button" id="exportCsv">⬇️ Exporter CSV</button>
             <button class="button secondary" type="button" id="exportPng">🖼️ Exporter PNG</button>
+            <button class="button danger" type="button" id="resetSatisfaction">Remettre les satisfactions a zero</button>
             <button class="button danger" type="button" id="resetAll">❌ Remise a zero</button>
           </div>
         </div>
@@ -115,9 +120,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260808-5"></script>
-  <script src="rdc-provinces-geojson.js?v=20260808-5"></script>
-  <script src="app.js?v=20260808-5"></script>
+  <script src="supabase-config.js?v=20260808-6"></script>
+  <script src="rdc-provinces-geojson.js?v=20260808-6"></script>
+  <script src="app.js?v=20260808-6"></script>
   <script>
     PMIMapApp.initDashboard();
   </script>

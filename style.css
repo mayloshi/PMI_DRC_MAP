@@ -440,8 +440,16 @@ svg {
 
 .continent-icon {
   width: 42px;
+  min-width: 0;
   height: 42px;
+  display: block;
   flex: 0 0 42px;
+}
+
+svg.continent-icon {
+  width: 42px;
+  min-width: 0;
+  height: 42px;
 }
 
 .continent-icon path {
@@ -453,6 +461,16 @@ svg {
 
 .continent-icon text {
   font-size: 15px;
+}
+
+#configPreview {
+  min-height: 126px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12.5px;
+}
+
+#dashboardStatus:empty {
+  display: none;
 }
 
 .mini-count {
