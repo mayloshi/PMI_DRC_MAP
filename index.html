@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Carte des membres et volontaires</title>
-  <link rel="stylesheet" href="style.css?v=20260808-4">
+  <link rel="stylesheet" href="style.css?v=20260808-5">
 </head>
 <body>
   <header class="topbar">
@@ -111,6 +111,7 @@
     </aside>
 
     <section class="map-section">
+      <div class="map-main">
       <div class="map-shell panel">
         <div class="map-toolbar">
           <h2>RDC - 26 provinces</h2>
@@ -127,6 +128,25 @@
           </svg>
         </div>
         <p class="source-note">Limites provinciales : geoBoundaries COD ADM1, source OpenStreetMap/Wambacher, licence ODbL 1.0.</p>
+      </div>
+
+      <section class="panel home-charts">
+        <h2>Histogrammes</h2>
+        <div class="home-chart-grid">
+          <div>
+            <h3>Membres par province</h3>
+            <canvas id="homeMembersChart" width="1100" height="430"></canvas>
+          </div>
+          <div>
+            <h3>Volontaires par province</h3>
+            <canvas id="homeVolunteersChart" width="1100" height="430"></canvas>
+          </div>
+          <div>
+            <h3>Votes par nombre d'etoiles</h3>
+            <canvas id="homeStarsChart" width="900" height="320"></canvas>
+          </div>
+        </div>
+      </section>
       </div>
 
       <div class="side-stack">
@@ -146,9 +166,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260808-4"></script>
-  <script src="rdc-provinces-geojson.js?v=20260808-4"></script>
-  <script src="app.js?v=20260808-4"></script>
+  <script src="supabase-config.js?v=20260808-5"></script>
+  <script src="rdc-provinces-geojson.js?v=20260808-5"></script>
+  <script src="app.js?v=20260808-5"></script>
   <script>
     PMIMapApp.initHome();
   </script>

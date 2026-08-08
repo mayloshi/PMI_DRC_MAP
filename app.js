@@ -483,6 +483,7 @@
     const stats = buildStats(profiles);
     renderCounts(stats);
     renderGlobalMood(satisfaction);
+    drawHomeHistograms(stats, satisfaction);
   }
 
   function renderCounts(stats) {
@@ -508,6 +509,110 @@
     setText('monthMoodEmoji', moodEmoji(monthAvg));
     setText('yearMoodScore', `Annee ${yearAvg.toFixed(1)}/5`);
     setText('yearMoodEmoji', moodEmoji(yearAvg));
+  }
+
+  function drawHomeHistograms(stats, satisfaction) {
+    drawSingleProvinceHistogram('homeMembersChart', stats, 'members', 'Membres par province', '#4f17a8');
+    drawSingleProvinceHistogram('homeVolunteersChart', stats, 'volunteers', 'Volontaires par province', '#00b5d1');
+    drawStarsHistogram('homeStarsChart', satisfaction);
+  }
+
+  function drawSingleProvinceHistogram(id, stats, field, title, color) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    clearCanvas(ctx, canvas);
+    const entries = provinces()
+      .map(province => [province.name, (stats[province.name] && stats[province.name][field]) || 0])
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    const max = Math.max(1, ...entries.map(([, value]) => value));
+    const padLeft = 46;
+    const chartTop = 54;
+    const chartBottom = 305;
+    const barGap = 5;
+    const barW = Math.max(12, (canvas.width - padLeft * 2) / entries.length - barGap);
+    ctx.fillStyle = '#1b1f2a';
+    ctx.font = '20px Aptos, Calibri, Tahoma, Arial';
+    ctx.fillText(title, padLeft, 30);
+    ctx.strokeStyle = '#d9deea';
+    ctx.beginPath();
+    ctx.moveTo(padLeft, chartBottom);
+    ctx.lineTo(canvas.width - padLeft, chartBottom);
+    ctx.stroke();
+    entries.forEach(([name, value], index) => {
+      const x = padLeft + index * (barW + barGap);
+      const height = value / max * (chartBottom - chartTop);
+      ctx.fillStyle = color;
+      ctx.fillRect(x, chartBottom - height, barW, height);
+      ctx.fillStyle = '#1b1f2a';
+      ctx.font = '12px Aptos, Calibri, Tahoma, Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(String(value), x + barW / 2, chartBottom - height - 6);
+      ctx.save();
+      ctx.translate(x + barW / 2, chartBottom + 18);
+      ctx.rotate(-Math.PI / 3);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#344054';
+      ctx.font = '11px Aptos, Calibri, Tahoma, Arial';
+      ctx.fillText(name, 0, 0);
+      ctx.restore();
+    });
+    ctx.textAlign = 'left';
+  }
+
+  function drawStarsHistogram(id, satisfaction) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    clearCanvas(ctx, canvas);
+    const counts = yearlyRoundedRatingCounts(satisfaction);
+    const max = Math.max(1, ...counts.slice(1));
+    const left = 70;
+    const bottom = 250;
+    const top = 58;
+    const step = 140;
+    const barW = 70;
+    ctx.fillStyle = '#1b1f2a';
+    ctx.font = '20px Aptos, Calibri, Tahoma, Arial';
+    ctx.fillText("Votes par nombre d'etoiles - moyenne annuelle arrondie par votant", left, 30);
+    ctx.strokeStyle = '#d9deea';
+    ctx.beginPath();
+    ctx.moveTo(left - 20, bottom);
+    ctx.lineTo(left + step * 4 + 90, bottom);
+    ctx.stroke();
+    for (let rating = 1; rating <= 5; rating += 1) {
+      const value = counts[rating];
+      const x = left + (rating - 1) * step;
+      const height = value / max * (bottom - top);
+      ctx.fillStyle = '#ffb000';
+      ctx.fillRect(x, bottom - height, barW, height);
+      ctx.fillStyle = '#1b1f2a';
+      ctx.font = '16px Aptos, Calibri, Tahoma, Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(String(value), x + barW / 2, bottom - height - 8);
+      ctx.font = '15px Aptos, Calibri, Tahoma, Arial';
+      ctx.fillText(`${rating} etoile${rating > 1 ? 's' : ''}`, x + barW / 2, bottom + 28);
+    }
+    ctx.textAlign = 'left';
+  }
+
+  function yearlyRoundedRatingCounts(items) {
+    const year = currentPeriod().slice(0, 4);
+    const byVoter = {};
+    items
+      .filter(item => item.period && item.period.slice(0, 4) === year)
+      .forEach(item => {
+        const key = normalizeEmail(item.email) || normalizePmiId(item.pmiId);
+        if (!key) return;
+        if (!byVoter[key]) byVoter[key] = [];
+        byVoter[key].push(Number(item.rating));
+      });
+    const counts = [0, 0, 0, 0, 0, 0];
+    Object.values(byVoter).forEach(values => {
+      const rounded = Math.max(1, Math.min(5, Math.round(average(values))));
+      counts[rounded] += 1;
+    });
+    return counts;
   }
 
   function readIdentity() {
