@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Dashboard</title>
-  <link rel="stylesheet" href="style.css?v=20260809-1">
+  <link rel="stylesheet" href="style.css?v=20260809-2">
 </head>
 <body>
   <header class="topbar">
@@ -28,13 +28,13 @@
         <input id="dashboardPassword" type="password" autocomplete="current-password">
       </div>
       <button class="button primary" type="button" id="unlockDashboard">Ouvrir le dashboard</button>
-      <div class="status" id="dashboardStatus">Saisissez le mot de passe pour acceder aux statistiques.</div>
+      <div class="status" id="dashboardStatus">Saisissez le mot de passe pour accéder aux statistiques.</div>
     </section>
 
     <section id="dashboardContent" hidden>
       <div class="dashboard-grid">
         <section class="panel">
-          <h2>Connexion base de donnees</h2>
+          <h2>Connexion base de données</h2>
           <div class="field">
             <label for="supabaseUrl">Supabase URL</label>
             <input id="supabaseUrl" placeholder="https://votre-projet.supabase.co">
@@ -48,7 +48,7 @@
           </div>
           <div class="status" id="dbConnectionStatus"></div>
           <textarea id="configPreview" rows="5" readonly></textarea>
-          <p class="note">Les champs et le contenu ci-dessus viennent de `supabase-config.js` si le fichier est publie. Une page statique ne peut pas ecrire directement dans ce fichier : ce bouton genere le fichier a publier.</p>
+          <p class="note">Les champs et le contenu ci-dessus viennent de `supabase-config.js` si le fichier est publié. Une page statique ne peut pas écrire directement dans ce fichier : ce bouton génère le fichier à publier.</p>
         </section>
 
         <section class="panel kpi-panel">
@@ -69,8 +69,8 @@
           <div class="button-row">
             <button class="button secondary" type="button" id="exportCsv">⬇️ Exporter CSV</button>
             <button class="button secondary" type="button" id="exportPng">🖼️ Exporter PNG</button>
-            <button class="button danger" type="button" id="resetSatisfaction">Remettre les satisfactions a zero</button>
-            <button class="button danger" type="button" id="resetAll">❌ Remise a zero</button>
+            <button class="button danger" type="button" id="resetSatisfaction">Remettre les satisfactions à zéro</button>
+            <button class="button danger" type="button" id="resetAll">❌ Remise à zéro</button>
           </div>
         </div>
         <canvas id="provinceChart" width="1200" height="520"></canvas>
@@ -98,7 +98,7 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Periode</th><th>Moyenne</th><th>Niko-niko</th><th>Commentaires</th></tr></thead>
+            <thead><tr><th>Période</th><th>Moyenne</th><th>Niko-niko</th><th>Commentaires</th></tr></thead>
             <tbody id="nikoBody"></tbody>
           </table>
         </div>
@@ -139,12 +139,12 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260809-1"></script>
-  <script src="rdc-provinces-geojson.js?v=20260809-1"></script>
-  <script src="app.js?v=20260809-1"></script>
+  <script src="supabase-config.js?v=20260809-2"></script>
+  <script src="rdc-provinces-geojson.js?v=20260809-2"></script>
+  <script src="app.js?v=20260809-2"></script>
   <script>
     PMIMapApp.initDashboard();
   </script>
-  <footer class="site-footer">Copyright Chapitre PMI RDC - Aout 2026</footer>
+  <footer class="site-footer">Copyright Chapitre PMI RDC - août 2026</footer>
 </body>
 </html>

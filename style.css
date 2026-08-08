@@ -140,6 +140,11 @@ p {
   color: var(--danger);
 }
 
+button:disabled, .button:disabled, select:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
 input, select, textarea {
   width: 100%;
   border: 1px solid #c6ccda;

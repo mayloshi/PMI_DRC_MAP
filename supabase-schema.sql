@@ -4,8 +4,8 @@ create table if not exists public.pmi_drc_map_profiles (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  email text not null,
-  pmi_id text not null,
+  email text,
+  pmi_id text,
   gender text check (gender in ('M', 'F') or gender is null),
   occupation_status text check (occupation_status in ('Etudiant', 'Professionnel') or occupation_status is null),
   member_active boolean not null default false,
@@ -27,8 +27,8 @@ create unique index if not exists pmi_drc_map_profiles_pmi_id_unique
 create table if not exists public.pmi_drc_map_satisfaction (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
-  email text not null,
-  pmi_id text not null,
+  email text,
+  pmi_id text,
   period text not null,
   rating integer not null check (rating between 1 and 5),
   comment text
@@ -36,6 +36,9 @@ create table if not exists public.pmi_drc_map_satisfaction (
 
 create unique index if not exists pmi_drc_map_satisfaction_email_period_unique
   on public.pmi_drc_map_satisfaction (email, period);
+
+create unique index if not exists pmi_drc_map_satisfaction_pmi_id_period_unique
+  on public.pmi_drc_map_satisfaction (pmi_id, period);
 
 create table if not exists public.pmi_drc_map_logs (
   id uuid primary key default gen_random_uuid(),
@@ -52,6 +55,11 @@ alter table public.pmi_drc_map_profiles enable row level security;
 alter table public.pmi_drc_map_satisfaction enable row level security;
 alter table public.pmi_drc_map_logs enable row level security;
 
+alter table public.pmi_drc_map_profiles alter column email drop not null;
+alter table public.pmi_drc_map_profiles alter column pmi_id drop not null;
+alter table public.pmi_drc_map_satisfaction alter column email drop not null;
+alter table public.pmi_drc_map_satisfaction alter column pmi_id drop not null;
+
 drop policy if exists "Public read profiles" on public.pmi_drc_map_profiles;
 create policy "Public read profiles"
   on public.pmi_drc_map_profiles
@@ -62,14 +70,14 @@ drop policy if exists "Public insert profiles" on public.pmi_drc_map_profiles;
 create policy "Public insert profiles"
   on public.pmi_drc_map_profiles
   for insert
-  with check (email <> '' and pmi_id <> '');
+  with check (coalesce(email, '') <> '' or coalesce(pmi_id, '') <> '');
 
 drop policy if exists "Public update profiles" on public.pmi_drc_map_profiles;
 create policy "Public update profiles"
   on public.pmi_drc_map_profiles
   for update
   using (true)
-  with check (email <> '' and pmi_id <> '');
+  with check (coalesce(email, '') <> '' or coalesce(pmi_id, '') <> '');
 
 drop policy if exists "Public delete profiles" on public.pmi_drc_map_profiles;
 create policy "Public delete profiles"
@@ -87,14 +95,14 @@ drop policy if exists "Public insert satisfaction" on public.pmi_drc_map_satisfa
 create policy "Public insert satisfaction"
   on public.pmi_drc_map_satisfaction
   for insert
-  with check (email <> '' and pmi_id <> '' and rating between 1 and 5);
+  with check ((coalesce(email, '') <> '' or coalesce(pmi_id, '') <> '') and rating between 1 and 5);
 
 drop policy if exists "Public update satisfaction" on public.pmi_drc_map_satisfaction;
 create policy "Public update satisfaction"
   on public.pmi_drc_map_satisfaction
   for update
   using (true)
-  with check (email <> '' and pmi_id <> '' and rating between 1 and 5);
+  with check ((coalesce(email, '') <> '' or coalesce(pmi_id, '') <> '') and rating between 1 and 5);
 
 drop policy if exists "Public delete satisfaction" on public.pmi_drc_map_satisfaction;
 create policy "Public delete satisfaction"

@@ -17,10 +17,9 @@ Application web statique pour cartographier les membres et volontaires du PMI RD
 
 La page permet a une personne de renseigner :
 
-- email ;
-- PMI ID ;
+- email ou PMI ID, ou les deux ;
 - sexe : M ou F ;
-- statut : Etudiant ou Professionnel ;
+- statut : Étudiant ou Professionnel ;
 - statut PMI : Membre, Volontaire, ou Membre et volontaire.
 
 Regles appliquees :
@@ -31,10 +30,11 @@ Regles appliquees :
 - elle peut annuler membre, volontaire, ou les deux ;
 - les compteurs par province affichent membres et volontaires.
 - un mini tutoriel explique les etapes directement sur la page.
+- les statistiques se rafraichissent automatiquement toutes les 30 secondes.
 
 ## Enquete de satisfaction
 
-Chaque personne peut donner une note mensuelle de 1 a 5 etoiles et ajouter un commentaire. Le dashboard genere :
+Chaque personne peut donner une note mensuelle de 1 à 5 étoiles et ajouter un commentaire. Si une enquête existe déjà pour le même email et le même mois, elle est remplacée.
 
 - un tableau niko-niko mensuel ;
 - un tableau niko-niko trimestriel ;

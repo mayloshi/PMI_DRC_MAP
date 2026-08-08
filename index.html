@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Carte des membres et volontaires</title>
-  <link rel="stylesheet" href="style.css?v=20260809-1">
+  <link rel="stylesheet" href="style.css?v=20260809-2">
 </head>
 <body>
   <header class="topbar">
@@ -20,7 +20,7 @@
         <span id="monthMoodEmoji">-</span>
         <strong id="monthMoodScore">Mois 0.0/5</strong>
       </div>
-      <div class="global-mood" title="Satisfaction depuis le debut de l'annee">
+      <div class="global-mood" title="Satisfaction depuis le début de l'année">
         <span id="yearMoodEmoji">-</span>
         <strong id="yearMoodScore">Annee 0.0/5</strong>
       </div>
@@ -36,7 +36,7 @@
           <li>Renseignez votre email, PMI ID, sexe et statut.</li>
           <li>Choisissez membre, volontaire ou les deux.</li>
           <li>Cliquez sur votre province ou votre continent hors RDC.</li>
-          <li>Ajoutez votre satisfaction du mois avec les etoiles.</li>
+          <li>Ajoutez votre satisfaction du mois avec les étoiles.</li>
           <li>Utilisez l'annulation si vous devez retirer un choix.</li>
         </ol>
       </section>
@@ -61,12 +61,12 @@
         <div class="field">
           <span class="field-label">🎓💼 Statut</span>
           <div class="radio-row">
-            <label><input type="radio" name="occupationStatus" value="Etudiant"> 🎓 Etudiant</label>
+            <label><input type="radio" name="occupationStatus" value="Etudiant"> 🎓 Étudiant</label>
             <label><input type="radio" name="occupationStatus" value="Professionnel"> 💼 Professionnel</label>
           </div>
         </div>
       </div>
-      <button class="button secondary" type="button" id="updateProfileInfo">Mettre a jour sexe/statut</button>
+      <button class="button secondary" type="button" id="updateProfileInfo" disabled>Mettre à jour sexe/statut</button>
 
       <h2>📍 Localisation</h2>
       <div class="two-cols">
@@ -81,24 +81,24 @@
         </div>
         <div class="field">
           <label for="roleAction">🛠 Action</label>
-          <select id="roleAction" required>
-            <option value="add">Ajouter / mettre a jour</option>
+          <select id="roleAction" required disabled>
+            <option value="add">Ajouter / mettre à jour</option>
             <option value="cancel">❌ Annuler</option>
           </select>
         </div>
       </div>
-      <p class="note">Cliquez ensuite sur une province ou un continent. Si vous ajoutez un deuxieme role plus tard, la nouvelle province remplace aussi la province du role deja actif.</p>
-      <button class="button secondary" type="button" id="applyCancel">❌ Appliquer une annulation</button>
-      <div class="selected-zone" id="selectedZone">Aucune zone selectionnee.</div>
-      <div class="status" id="statusBox">Les compteurs se mettent a jour apres chaque operation valide.</div>
+      <p class="note">Cliquez ensuite sur une province ou un continent. Si vous ajoutez un deuxième rôle plus tard, la nouvelle province remplace aussi la province du rôle déjà actif.</p>
+      <button class="button secondary" type="button" id="applyCancel" disabled>❌ Appliquer une annulation</button>
+      <div class="selected-zone" id="selectedZone">Aucune zone sélectionnée.</div>
+      <div class="status" id="statusBox">Les compteurs se mettent à jour après chaque opération valide.</div>
 
       <section class="survey-box">
-        <h2>⭐ Enquete de satisfaction</h2>
+        <h2>⭐ Enquête de satisfaction</h2>
         <div class="field">
           <label for="surveyMonth">Mois</label>
           <input id="surveyMonth" type="month" disabled>
         </div>
-        <div class="stars" id="stars" aria-label="Satisfaction de 1 a 5 etoiles">
+        <div class="stars" id="stars" aria-label="Satisfaction de 1 à 5 étoiles">
           <button type="button" data-rating="1">☆</button>
           <button type="button" data-rating="2">☆</button>
           <button type="button" data-rating="3">☆</button>
@@ -142,7 +142,7 @@
             <canvas id="homeVolunteersChart" width="1100" height="430"></canvas>
           </div>
           <div>
-            <h3>Votes par nombre d'etoiles</h3>
+            <h3>Votes par nombre d'étoiles</h3>
             <canvas id="homeStarsChart" width="900" height="320"></canvas>
           </div>
         </div>
@@ -155,7 +155,7 @@
           <div class="continent-list" id="continentList"></div>
         </div>
         <div class="panel">
-          <h2>Total general</h2>
+          <h2>Total général</h2>
           <div class="totals">
             <div><strong>💜 Membres</strong><span id="totalMembers">0</span></div>
             <div><strong>🙋 Volontaires</strong><span id="totalVolunteers">0</span></div>
@@ -166,12 +166,12 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260809-1"></script>
-  <script src="rdc-provinces-geojson.js?v=20260809-1"></script>
-  <script src="app.js?v=20260809-1"></script>
+  <script src="supabase-config.js?v=20260809-2"></script>
+  <script src="rdc-provinces-geojson.js?v=20260809-2"></script>
+  <script src="app.js?v=20260809-2"></script>
   <script>
     PMIMapApp.initHome();
   </script>
-  <footer class="site-footer">Copyright Chapitre PMI RDC - Aout 2026</footer>
+  <footer class="site-footer">Copyright Chapitre PMI RDC - août 2026</footer>
 </body>
 </html>

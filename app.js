@@ -112,21 +112,23 @@
 
   async function upsertProfile(profile) {
     const body = profileToRow(profile);
-    const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_profiles?on_conflict=email`, {
+    const conflictKey = profile.email ? 'email' : 'pmi_id';
+    const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_profiles?on_conflict=${conflictKey}`, {
       method: 'POST',
       headers: Object.assign({}, supabaseHeaders(), { Prefer: 'resolution=merge-duplicates' }),
       body: JSON.stringify(body)
     });
-    if (!response.ok) throw new Error(await supabaseError(response, 'Supabase a refuse la mise a jour du profil.'));
+    if (!response.ok) throw new Error(await supabaseError(response, 'Supabase a refus? la mise ? jour du profil.'));
   }
 
-  async function deleteProfile(email) {
-    const profiles = (await loadProfiles()).filter(profile => profile.email !== email);
+  async function deleteProfile(identityValue) {
+    const profiles = (await loadProfiles()).filter(profile => profile.email !== identityValue && profile.pmiId !== identityValue);
     if (!isSupabaseConfigured()) {
       writeJson(PROFILE_KEY, profiles);
       return profiles;
     }
-    const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_profiles?email=eq.${encodeURIComponent(email)}`, {
+    const column = identityValue.includes('@') ? 'email' : 'pmi_id';
+    const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_profiles?${column}=eq.${encodeURIComponent(identityValue)}`, {
       method: 'DELETE',
       headers: supabaseHeaders()
     });
@@ -159,7 +161,7 @@
       method: 'DELETE',
       headers: supabaseHeaders()
     });
-    if (!response.ok) throw new Error(await supabaseError(response, 'La remise a zero des satisfactions Supabase a echoue.'));
+    if (!response.ok) throw new Error(await supabaseError(response, 'La remise \u00e0 z\u00e9ro des satisfactions Supabase a \u00e9chou\u00e9.'));
     localStorage.removeItem(SAT_KEY);
   }
 
@@ -185,14 +187,15 @@
 
   async function saveSatisfaction(item) {
     const row = {
-      email: item.email,
-      pmi_id: item.pmiId,
+      email: item.email || null,
+      pmi_id: item.pmiId || null,
       period: item.period,
       rating: item.rating,
       comment: item.comment || ''
     };
     if (isSupabaseConfigured()) {
-      const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?on_conflict=email,period`, {
+      const conflictKey = item.email ? 'email,period' : 'pmi_id,period';
+      const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?on_conflict=${conflictKey}`, {
         method: 'POST',
         headers: Object.assign({}, supabaseHeaders(), { Prefer: 'resolution=merge-duplicates' }),
         body: JSON.stringify(row)
@@ -200,10 +203,19 @@
       if (!response.ok) throw new Error(await supabaseError(response, 'Supabase a refuse la satisfaction.'));
     }
     const items = readJson(SAT_KEY, []);
-    const index = items.findIndex(existing => existing.email === item.email && existing.period === item.period);
+    const index = items.findIndex(existing => sameSatisfactionIdentity(existing, item) && existing.period === item.period);
     if (index >= 0) items[index] = Object.assign({}, items[index], item);
     else items.push(item);
     writeJson(SAT_KEY, items);
+  }
+
+  function sameSatisfactionIdentity(a, b) {
+    const emailA = normalizeEmail(a.email);
+    const emailB = normalizeEmail(b.email);
+    const pmiA = normalizePmiId(a.pmiId);
+    const pmiB = normalizePmiId(b.pmiId);
+    if (emailA && emailB) return emailA === emailB;
+    return Boolean(pmiA && pmiB && pmiA === pmiB);
   }
 
   async function loadLogs() {
@@ -280,8 +292,8 @@
 
   function profileToRow(profile) {
     return {
-      email: profile.email,
-      pmi_id: profile.pmiId,
+      email: profile.email || null,
+      pmi_id: profile.pmiId || null,
       gender: profile.gender,
       occupation_status: profile.occupationStatus,
       member_active: Boolean(profile.roles.member.active),
@@ -352,25 +364,25 @@
 
     if (action === 'cancel') {
       const active = roles.filter(role => profile.roles[role].active);
-      if (!active.length) return { ok: false, message: 'Aucun role correspondant a annuler pour ce profil.' };
+      if (!active.length) return { ok: false, message: 'Aucun r\u00f4le correspondant \u00e0 annuler pour ce profil.' };
       active.forEach(role => {
         profile.roles[role] = { active: false, zoneName: '', zoneType: '', updatedAt: now };
       });
-      return { ok: true, message: `Annulation effectuee pour ${active.map(roleLabel).join(' et ')}.` };
+      return { ok: true, message: `Annulation effectu\u00e9e pour ${active.map(roleLabel).join(' et ')}.` };
     }
 
     const hasMember = profile.roles.member.active;
     const hasVolunteer = profile.roles.volunteer.active;
     if (roleChoice === 'both' && (hasMember || hasVolunteer)) {
       const existing = hasMember && hasVolunteer ? 'membre et volontaire' : (hasMember ? 'membre' : 'volontaire');
-      return { ok: false, message: `Vous etes deja enregistre comme ${existing}. Modifiez ou annulez un statut precis au lieu de choisir Membre et volontaire.` };
+      return { ok: false, message: `Vous \u00eates d\u00e9j\u00e0 enregistr\u00e9 comme ${existing}. Modifiez ou annulez un statut pr\u00e9cis au lieu de choisir Membre et volontaire.` };
     }
 
     roles.forEach(role => {
       profile.roles[role] = { active: true, zoneName, zoneType, updatedAt: now };
     });
 
-    let message = `Localisation enregistree pour ${roles.map(roleLabel).join(' et ')}.`;
+    let message = `Localisation enregistr\u00e9e pour ${roles.map(roleLabel).join(' et ')}.`;
     const newSecondRole = roles.length === 1 && ((roles[0] === 'member' && hasVolunteer) || (roles[0] === 'volunteer' && hasMember));
     if (newSecondRole) {
       profile.roles.member.zoneName = zoneName;
@@ -379,7 +391,7 @@
       profile.roles.volunteer.zoneName = zoneName;
       profile.roles.volunteer.zoneType = zoneType;
       profile.roles.volunteer.updatedAt = now;
-      message += ' La nouvelle province remplace aussi la province du role deja actif.';
+      message += ' La nouvelle province remplace aussi la province du r\u00f4le d\u00e9j\u00e0 actif.';
     }
     return { ok: true, message };
   }
@@ -660,7 +672,7 @@
     const barW = 70;
     ctx.fillStyle = '#1b1f2a';
     ctx.font = '20px Aptos, Calibri, Tahoma, Arial';
-    ctx.fillText("Votes par nombre d'etoiles - moyenne annuelle arrondie par votant", left, 30);
+    ctx.fillText("Votes par nombre d'?toiles - moyenne annuelle arrondie par votant", left, 30);
     ctx.strokeStyle = '#d9deea';
     ctx.beginPath();
     ctx.moveTo(left - 20, bottom);
@@ -701,7 +713,8 @@
     return counts;
   }
 
-  function readIdentity() {
+  function readIdentity(options) {
+    const opts = options || {};
     const identity = {
       email: document.getElementById('email').value,
       pmiId: document.getElementById('pmiId').value,
@@ -711,33 +724,82 @@
     if (!identity.email && !identity.pmiId) {
       throw new Error('Renseignez au moins email ou PMI ID.');
     }
-    if (!identity.gender || !identity.occupationStatus) {
-      throw new Error('Completez sexe et statut.');
+    if (opts.requireProfileFields !== false && (!identity.gender || !identity.occupationStatus)) {
+      throw new Error('Complétez le sexe et le statut.');
     }
     if (identity.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identity.email)) throw new Error('Email invalide.');
     return identity;
   }
 
+  function readIdentityForLookup() {
+    return readIdentity({ requireProfileFields: false });
+  }
+
+  function findProfileByIdentity(profiles, identity) {
+    const email = normalizeEmail(identity.email);
+    const pmiId = normalizePmiId(identity.pmiId);
+    return profiles.find(item => (email && item.email === email) || (pmiId && item.pmiId === pmiId));
+  }
+
+  function assertIdentityMatchesProfile(profile, identity) {
+    const email = normalizeEmail(identity.email);
+    const pmiId = normalizePmiId(identity.pmiId);
+    if (profile && email && profile.email && profile.email !== email) throw new Error('Ce PMI ID est déjà associé à un autre email.');
+    if (profile && pmiId && profile.pmiId && profile.pmiId !== pmiId) throw new Error('Cet email est déjà associé à un autre PMI ID.');
+  }
+
+  function mergeIdentityIntoProfile(profile, identity) {
+    const email = normalizeEmail(identity.email);
+    const pmiId = normalizePmiId(identity.pmiId);
+    if (email && !profile.email) profile.email = email;
+    if (pmiId && !profile.pmiId) profile.pmiId = pmiId;
+  }
+
+  async function existingProfileForForm() {
+    const identity = readIdentityForLookup();
+    const profiles = await loadProfiles();
+    const profile = findProfileByIdentity(profiles, identity);
+    if (profile) assertIdentityMatchesProfile(profile, identity);
+    return profile || null;
+  }
+
+  async function updateExistingActionState() {
+    const updateButton = document.getElementById('updateProfileInfo');
+    const cancelButton = document.getElementById('applyCancel');
+    const actionSelect = document.getElementById('roleAction');
+    if (!updateButton || !cancelButton || !actionSelect) return;
+    updateButton.disabled = true;
+    cancelButton.disabled = true;
+    actionSelect.disabled = true;
+    try {
+      const profile = await existingProfileForForm();
+      const enabled = Boolean(profile);
+      updateButton.disabled = !enabled;
+      cancelButton.disabled = !enabled;
+      actionSelect.disabled = !enabled;
+      if (!enabled) actionSelect.value = 'add';
+    } catch (error) {
+      actionSelect.value = 'add';
+    }
+  }
+
   async function handleZone(zoneName, zoneType) {
-    setText('selectedZone', `Zone selectionnee : ${zoneName}`);
+    setText('selectedZone', `Zone sélectionnée : ${zoneName}`);
     try {
       const identity = readIdentity();
       const roleChoice = document.getElementById('roleChoice').value;
       const action = document.getElementById('roleAction').value;
       if (action === 'cancel') {
-        throw new Error('Pour annuler, utilisez le bouton Appliquer une annulation. Aucun nouveau clic sur la carte n est necessaire.');
+        throw new Error("Pour annuler, utilisez le bouton Appliquer une annulation. Aucun nouveau clic sur la carte n'est nécessaire.");
       }
       const profiles = await loadProfiles();
-      const email = normalizeEmail(identity.email);
-      const pmiId = normalizePmiId(identity.pmiId);
-      let profile = profiles.find(item => (email && item.email === email) || (pmiId && item.pmiId === pmiId));
-      if (profile && email && profile.email !== email) throw new Error('Ce PMI ID est deja associe a un autre email.');
-      if (profile && pmiId && profile.pmiId !== pmiId) throw new Error('Cet email est deja associe a un autre PMI ID.');
+      let profile = findProfileByIdentity(profiles, identity);
+      assertIdentityMatchesProfile(profile, identity);
       if (!profile) {
-        if (!email || !pmiId) throw new Error('Pour une premiere localisation, renseignez email et PMI ID.');
         profile = blankProfile(identity);
         profiles.push(profile);
       }
+      mergeIdentityIntoProfile(profile, identity);
       profile.gender = identity.gender;
       profile.occupationStatus = identity.occupationStatus;
       const result = applyRoleOperation(profile, roleChoice, action, zoneName, zoneType);
@@ -749,6 +811,7 @@
         details: `${result.message} Zone: ${zoneName} (${zoneType}). Choix: ${roleChoice}.`
       });
       await refreshHome();
+      await updateExistingActionState();
       setStatus(result.message, 'success');
     } catch (error) {
       setStatus(error.message, 'error');
@@ -760,12 +823,10 @@
       const identity = readIdentity();
       const roleChoice = document.getElementById('roleChoice').value;
       const profiles = await loadProfiles();
-      const email = normalizeEmail(identity.email);
-      const pmiId = normalizePmiId(identity.pmiId);
-      const profile = profiles.find(item => (email && item.email === email) || (pmiId && item.pmiId === pmiId));
-      if (!profile) throw new Error('Aucune localisation trouvee pour cet email ou ce PMI ID.');
-      if (email && profile.email !== email) throw new Error('Ce PMI ID est associe a un autre email.');
-      if (pmiId && profile.pmiId !== pmiId) throw new Error('Cet email est associe a un autre PMI ID.');
+      const profile = findProfileByIdentity(profiles, identity);
+      if (!profile) throw new Error('Aucune localisation trouvée pour cet email ou ce PMI ID.');
+      assertIdentityMatchesProfile(profile, identity);
+      mergeIdentityIntoProfile(profile, identity);
       const result = applyRoleOperation(profile, roleChoice, 'cancel', '', '');
       if (!result.ok) throw new Error(result.message);
       await saveProfiles(profiles);
@@ -775,6 +836,7 @@
         details: `${result.message} Choix: ${roleChoice}.`
       });
       await refreshHome();
+      await updateExistingActionState();
       setStatus(result.message, 'success');
     } catch (error) {
       setStatus(error.message, 'error');
@@ -785,23 +847,40 @@
     try {
       const identity = readIdentity();
       const profiles = await loadProfiles();
-      const email = normalizeEmail(identity.email);
-      const pmiId = normalizePmiId(identity.pmiId);
-      const profile = profiles.find(item => (email && item.email === email) || (pmiId && item.pmiId === pmiId));
-      if (!profile) throw new Error('Aucun profil trouve pour cet email ou ce PMI ID.');
+      const profile = findProfileByIdentity(profiles, identity);
+      if (!profile) throw new Error('Aucun profil trouvé pour cet email ou ce PMI ID.');
+      assertIdentityMatchesProfile(profile, identity);
+      mergeIdentityIntoProfile(profile, identity);
       profile.gender = identity.gender;
       profile.occupationStatus = identity.occupationStatus;
       await saveProfiles(profiles);
-      await logAction('mise a jour profil', {
+      await logAction('mise ? jour profil', {
         email: profile.email,
         pmiId: profile.pmiId,
         details: `Sexe: ${profile.gender}. Statut: ${profile.occupationStatus}.`
       });
       await refreshHome();
-      setStatus('Sexe/statut mis a jour.', 'success');
+      await updateExistingActionState();
+      setStatus('Sexe/statut mis à jour.', 'success');
     } catch (error) {
       setStatus(error.message, 'error');
     }
+  }
+
+  function existingSatisfaction(items, identity, period) {
+    const probe = {
+      email: normalizeEmail(identity.email),
+      pmiId: normalizePmiId(identity.pmiId),
+      period
+    };
+    return items.find(item => sameSatisfactionIdentity(item, probe) && item.period === period) || null;
+  }
+
+  function scheduleExistingActionState() {
+    clearTimeout(window.pmiActionStateTimer);
+    window.pmiActionStateTimer = setTimeout(() => {
+      updateExistingActionState().catch(() => {});
+    }, 250);
   }
 
   function setupStars() {
@@ -829,10 +908,10 @@
     document.getElementById('saveSurvey').addEventListener('click', async () => {
       try {
         const identity = readIdentity();
-        if (!identity.email || !identity.pmiId) throw new Error('Pour la satisfaction, renseignez email et PMI ID.');
         const rating = getRating();
-        if (!rating) throw new Error('Choisissez une note de satisfaction de 1 a 5.');
+        if (!rating) throw new Error('Choisissez une note de satisfaction de 1 \u00e0 5.');
         const period = currentPeriod();
+        const previous = existingSatisfaction(await loadSatisfaction(), identity, period);
         await saveSatisfaction({
           id: cryptoId(),
           email: normalizeEmail(identity.email),
@@ -845,17 +924,23 @@
         await logAction('satisfaction', {
           email: identity.email,
           pmiId: identity.pmiId,
-          details: `Periode: ${period}. Note: ${rating}/5.`
+          details: `P?riode: ${period}. Note: ${rating}/5.`
         });
         await refreshHome();
-        setStatus('Satisfaction mensuelle enregistree.', 'success');
+        setStatus(previous ? 'Votre enquête de satisfaction précédente pour ce mois a été remplacée.' : 'Satisfaction mensuelle enregistrée.', 'success');
       } catch (error) {
         setStatus(error.message, 'error');
       }
     });
     document.getElementById('applyCancel').addEventListener('click', handleCancel);
     document.getElementById('updateProfileInfo').addEventListener('click', updateProfileInfo);
+    document.getElementById('email').addEventListener('input', scheduleExistingActionState);
+    document.getElementById('pmiId').addEventListener('input', scheduleExistingActionState);
     await refreshHome();
+    await updateExistingActionState();
+    if (!window.pmiHomeRefreshTimer) {
+      window.pmiHomeRefreshTimer = setInterval(() => refreshHome().catch(error => setStatus(error.message, 'error')), 30000);
+    }
   }
 
   async function initDashboard() {
@@ -873,6 +958,9 @@
       await loadDbConfigFields();
       bindDashboardActions();
       await refreshDashboard();
+      if (!window.pmiDashboardRefreshTimer) {
+        window.pmiDashboardRefreshTimer = setInterval(() => refreshDashboard().catch(error => setDashboardStatus(error.message, 'error')), 30000);
+      }
     });
     password.addEventListener('keydown', event => {
       if (event.key === 'Enter') unlock.click();
@@ -899,16 +987,16 @@
     document.getElementById('resetSatisfaction').addEventListener('click', async () => {
       if (!confirm('Effacer toutes les satisfactions uniquement ?')) return;
       await resetSatisfactionData();
-      await logAction('remise a zero satisfactions', { details: 'Toutes les satisfactions ont ete effacees.' });
+      await logAction('remise \u00e0 z\u00e9ro satisfactions', { details: 'Toutes les satisfactions ont \u00e9t\u00e9 effac\u00e9es.' });
       await refreshDashboard();
-      setDashboardStatus('Satisfactions remises a zero.', 'success');
+      setDashboardStatus('Satisfactions remises \u00e0 z\u00e9ro.', 'success');
     });
     document.getElementById('resetAll').addEventListener('click', async () => {
       if (!confirm('Effacer tous les profils et toutes les satisfactions ?')) return;
       await resetAllData();
-      await logAction('remise a zero generale', { details: 'Profils et satisfactions effaces. Logs conserves.' });
+      await logAction('remise \u00e0 z\u00e9ro g\u00e9n\u00e9rale', { details: 'Profils et satisfactions effac\u00e9s. Logs conserv\u00e9s.' });
       await refreshDashboard();
-      setDashboardStatus('Donnees effacees.', 'success');
+      setDashboardStatus('Donn\u00e9es effac\u00e9es.', 'success');
     });
   }
 
@@ -946,7 +1034,7 @@
     if (!box) return;
     if (!isSupabaseConfigured()) {
       box.className = 'status error';
-      box.textContent = 'Base non configuree : les donnees restent dans ce navigateur et ne sont pas partagees.';
+      box.textContent = 'Base non configur?e : les donn?es restent dans ce navigateur et ne sont pas partag?es.';
       return;
     }
     try {
@@ -993,7 +1081,7 @@
       setText('dashboardEmoji', moodEmoji(satAvg));
       drawProvinceChart('provinceChart', stats);
       drawPieChart('genderChart', countBy(profiles, 'gender'), 'Sexe');
-      drawPieChart('occupationChart', countBy(profiles, 'occupationStatus'), 'Etudiant / Professionnel');
+      drawPieChart('occupationChart', countBy(profiles, 'occupationStatus'), '?tudiant / Professionnel');
       renderNiko(satisfaction);
       renderProfiles(profiles);
       await renderLogs();
@@ -1091,7 +1179,7 @@
       tr.innerHTML = `<td>${escapeHtml(key)}</td><td>${avg.toFixed(1)}</td><td>${moodEmoji(avg)}</td><td>${escapeHtml(comments)}</td>`;
       body.appendChild(tr);
     });
-    if (!body.children.length) body.innerHTML = '<tr><td colspan="4">Aucune satisfaction enregistree.</td></tr>';
+    if (!body.children.length) body.innerHTML = '<tr><td colspan="4">Aucune satisfaction enregistr?e.</td></tr>';
   }
 
   function renderProfiles(profiles) {
@@ -1106,7 +1194,7 @@
         <td>${profile.occupationStatus === 'Etudiant' ? '🎓 Etudiant' : profile.occupationStatus === 'Professionnel' ? '💼 Professionnel' : ''}</td>
         <td>${roleText(profile.roles.member, '💜')}</td>
         <td>${roleText(profile.roles.volunteer, '🙋')}</td>
-        <td><button class="delete-click" type="button" data-delete="${escapeHtml(profile.email)}">❌ Supprimer</button></td>
+        <td><button class="delete-click" type="button" data-delete="${escapeHtml(profile.email || profile.pmiId)}">❌ Supprimer</button></td>
       `;
       body.appendChild(tr);
     });
