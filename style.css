@@ -438,25 +438,15 @@ svg {
   min-width: 0;
 }
 
-.continent-icon {
-  width: 48px;
-  min-width: 0;
-  height: 48px;
-  display: block;
-  flex: 0 0 48px;
-}
-
-svg.continent-icon {
-  width: 48px;
-  min-width: 0;
-  height: 48px;
-}
-
-.continent-icon path {
-  fill: #dff5fb;
-  stroke: var(--pmi-purple);
-  stroke-width: 4;
-  stroke-linejoin: round;
+.continent-globe {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  font-size: 34px;
+  line-height: 1;
 }
 
 .log-table-wrap {

@@ -12,31 +12,13 @@
     'Oceanie'
   ];
 
-  const continentIcons = {
-    'Afrique hors RDC': {
-      source: 'Wikimedia/OpenClipart style Africa outline',
-      path: 'M48 5 L58 10 L64 20 L62 32 L72 43 L68 54 L60 58 L55 72 L47 93 L39 76 L28 63 L23 49 L16 40 L20 24 L31 11 Z'
-    },
-    Europe: {
-      source: 'Wikimedia/OpenClipart style Europe outline',
-      path: 'M17 42 L25 29 L38 22 L50 27 L61 20 L73 31 L67 44 L54 47 L43 56 L30 51 Z'
-    },
-    'Amerique du Nord': {
-      source: 'Wikimedia/OpenClipart style North America outline',
-      path: 'M9 28 L21 13 L44 8 L66 18 L82 33 L75 48 L58 50 L50 63 L35 60 L29 48 L14 43 Z'
-    },
-    'Amerique latine': {
-      source: 'Wikimedia/OpenClipart style South America outline',
-      path: 'M42 7 L56 18 L59 34 L52 48 L56 62 L47 80 L36 95 L29 76 L23 59 L30 43 L22 30 L30 16 Z'
-    },
-    Asie: {
-      source: 'Wikimedia/OpenClipart style Asia outline',
-      path: 'M8 32 L23 13 L45 8 L66 15 L89 33 L77 47 L88 61 L66 64 L54 82 L36 69 L20 57 Z'
-    },
-    Oceanie: {
-      source: 'Wikimedia/OpenClipart style Oceania outline',
-      path: 'M18 56 L29 43 L47 45 L59 56 L48 69 L28 67 Z M65 66 L75 61 L84 68 L76 75 Z M55 36 L61 31 L68 36 L62 42 Z'
-    }
+  const continentGlobes = {
+    'Afrique hors RDC': '🌍',
+    Europe: '🌍',
+    'Amerique du Nord': '🌎',
+    'Amerique latine': '🌎',
+    Asie: '🌏',
+    Oceanie: '🌏'
   };
 
   const provinceNameMap = {
@@ -549,15 +531,10 @@
       button.type = 'button';
       button.className = 'continent';
       button.dataset.zone = name;
-      button.innerHTML = `<span class="continent-main">${continentIcon(name)}<span><strong>${name}</strong><span class="mini-count" data-continent="${name}">M: 0 | V: 0</span></span></span><span>Choisir</span>`;
+      button.innerHTML = `<span class="continent-main"><span class="continent-globe" aria-hidden="true">${continentGlobes[name] || '🌍'}</span><span><strong>${name}</strong><span class="mini-count" data-continent="${name}">M: 0 | V: 0</span></span></span><span>Choisir</span>`;
       button.addEventListener('click', () => onZoneClick(name, 'Continent'));
       root.appendChild(button);
     });
-  }
-
-  function continentIcon(name) {
-    const icon = continentIcons[name] || continentIcons['Afrique hors RDC'];
-    return `<svg class="continent-icon" viewBox="0 0 100 100" aria-hidden="true" role="img"><path d="${icon.path}"></path></svg>`;
   }
 
   async function refreshHome() {
