@@ -820,7 +820,7 @@
 
   async function handleCancel() {
     try {
-      const identity = readIdentity();
+      const identity = readIdentityForLookup();
       const roleChoice = document.getElementById('roleChoice').value;
       const profiles = await loadProfiles();
       const profile = findProfileByIdentity(profiles, identity);
