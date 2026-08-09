@@ -496,8 +496,12 @@
         fill: province.color,
         tabindex: '0',
         role: 'button',
-        'aria-label': province.name
+        'aria-label': province.name,
+        'data-province-shape': province.name
       });
+      const title = createSvgElement('title', {});
+      title.textContent = `${province.name} - Membres: 0 | Volontaires: 0`;
+      shape.appendChild(title);
       shape.addEventListener('click', () => onZoneClick(province.name, 'Province'));
       shape.addEventListener('keydown', event => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -592,6 +596,9 @@
     Object.entries(stats).forEach(([name, item]) => {
       document.querySelectorAll(`[data-zone-count="${cssEscape(name)}"]`).forEach(el => {
         el.textContent = `M: ${item.members} | V: ${item.volunteers}`;
+      });
+      document.querySelectorAll(`[data-province-shape="${cssEscape(name)}"] title`).forEach(el => {
+        el.textContent = `${name} - Membres: ${item.members} | Volontaires: ${item.volunteers}`;
       });
       const continent = document.querySelector(`[data-continent="${cssEscape(name)}"]`);
       if (continent) continent.textContent = `M: ${item.members} | V: ${item.volunteers}`;
@@ -823,21 +830,37 @@
       const identity = readIdentityForLookup();
       const roleChoice = document.getElementById('roleChoice').value;
       const profiles = await loadProfiles();
+      const identityValue = normalizeEmail(identity.email) || normalizePmiId(identity.pmiId);
       const profile = findProfileByIdentity(profiles, identity);
       if (!profile) throw new Error('Aucune localisation trouvée pour cet email ou ce PMI ID.');
       assertIdentityMatchesProfile(profile, identity);
       mergeIdentityIntoProfile(profile, identity);
       const result = applyRoleOperation(profile, roleChoice, 'cancel', '', '');
       if (!result.ok) throw new Error(result.message);
-      await saveProfiles(profiles);
-      await logAction('annulation', {
-        email: profile.email,
-        pmiId: profile.pmiId,
-        details: `${result.message} Choix: ${roleChoice}.`
-      });
+      const hasActiveRole = profile.roles.member.active || profile.roles.volunteer.active;
+      if (!hasActiveRole) {
+        const confirmed = confirm("Cette personne n'a plus aucun statut actif. Voulez-vous supprimer son entrée de la base de données ?");
+        if (!confirmed) {
+          setStatus("Annulation interrompue : l'entrée n'a pas été supprimée.", 'error');
+          return;
+        }
+        await deleteProfile(identityValue);
+        await logAction('suppression après annulation', {
+          email: profile.email,
+          pmiId: profile.pmiId,
+          details: `${result.message} Aucun statut actif restant. Entrée supprimée.`
+        });
+      } else {
+        await saveProfiles(profiles);
+        await logAction('annulation', {
+          email: profile.email,
+          pmiId: profile.pmiId,
+          details: `${result.message} Choix: ${roleChoice}.`
+        });
+      }
       await refreshHome();
       await updateExistingActionState();
-      setStatus(result.message, 'success');
+      setStatus(hasActiveRole ? result.message : "Annulation effectuée et entrée supprimée de la base de données.", 'success');
     } catch (error) {
       setStatus(error.message, 'error');
     }

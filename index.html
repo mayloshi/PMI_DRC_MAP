@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Carte des membres et volontaires</title>
-  <link rel="stylesheet" href="style.css?v=20260809-3">
+  <link rel="stylesheet" href="style.css?v=20260809-4">
 </head>
 <body>
   <header class="topbar">
@@ -42,6 +42,7 @@
       </section>
 
       <h2>Identification</h2>
+      <div class="status" id="statusBox">Les compteurs se mettent à jour après chaque opération valide.</div>
       <div class="field">
         <label for="email">📧 Email</label>
         <input id="email" type="email" autocomplete="email" required>
@@ -91,7 +92,6 @@
       <button class="button secondary" type="button" id="applyCancel" disabled>❌ Appliquer une annulation</button>
       <p class="note">Pour annuler, renseignez seulement l'email ou le PMI ID déjà enregistré, choisissez le statut à annuler, puis cliquez sur ce bouton.</p>
       <div class="selected-zone" id="selectedZone">Aucune zone sélectionnée.</div>
-      <div class="status" id="statusBox">Les compteurs se mettent à jour après chaque opération valide.</div>
 
       <section class="survey-box">
         <h2>⭐ Enquête de satisfaction</h2>
@@ -167,9 +167,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260809-3"></script>
-  <script src="rdc-provinces-geojson.js?v=20260809-3"></script>
-  <script src="app.js?v=20260809-3"></script>
+  <script src="supabase-config.js?v=20260809-4"></script>
+  <script src="rdc-provinces-geojson.js?v=20260809-4"></script>
+  <script src="app.js?v=20260809-4"></script>
   <script>
     PMIMapApp.initHome();
   </script>
