@@ -1199,7 +1199,8 @@
       const avg = average(group.map(item => item.rating));
       const comments = group.map(item => item.comment).filter(Boolean).join(' | ');
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${escapeHtml(key)}</td><td>${avg.toFixed(1)}</td><td>${moodEmoji(avg)}</td><td>${escapeHtml(comments)}</td>`;
+      const commentLabel = comments ? `${group.filter(item => item.comment).length} commentaire(s)` : 'Aucun';
+      tr.innerHTML = `<td>${escapeHtml(key)}</td><td>${avg.toFixed(1)}</td><td>${moodEmoji(avg)}</td><td><span class="comment-tooltip" title="${escapeHtml(comments || 'Aucun commentaire')}">${escapeHtml(commentLabel)}</span></td>`;
       body.appendChild(tr);
     });
     if (!body.children.length) body.innerHTML = '<tr><td colspan="4">Aucune satisfaction enregistr?e.</td></tr>';

@@ -640,9 +640,29 @@ th {
   background: #fff7f7;
 }
 
+.comment-tooltip {
+  display: inline-flex;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--pmi-purple);
+  font-weight: 700;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
 @media (max-width: 1050px) {
   .home-grid, .map-section, .dashboard-grid, .small-charts {
     grid-template-columns: 1fr;
+  }
+
+  .map-main {
+    order: 1;
+  }
+
+  .side-stack {
+    order: 2;
   }
 
   .brand img {
