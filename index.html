@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Carte des membres et volontaires</title>
-  <link rel="stylesheet" href="style.css?v=20260809-4">
+  <link rel="stylesheet" href="style.css?v=20260810-1">
 </head>
 <body>
   <header class="topbar">
@@ -55,7 +55,7 @@
         <div class="field">
           <span class="field-label">👤 Sexe</span>
           <div class="radio-row">
-            <label><input type="radio" name="gender" value="M"> 👨 M</label>
+            <label><input type="radio" name="gender" value="M" checked> 👨 M</label>
             <label><input type="radio" name="gender" value="F"> 👩 F</label>
           </div>
         </div>
@@ -63,13 +63,13 @@
           <span class="field-label">🎓💼 Statut</span>
           <div class="radio-row">
             <label><input type="radio" name="occupationStatus" value="Etudiant"> 🎓 Étudiant</label>
-            <label><input type="radio" name="occupationStatus" value="Professionnel"> 💼 Professionnel</label>
+            <label><input type="radio" name="occupationStatus" value="Professionnel" checked> 💼 Professionnel</label>
           </div>
         </div>
       </div>
       <button class="button secondary" type="button" id="updateProfileInfo" disabled>Mettre à jour sexe/statut</button>
 
-      <h2>📍 Localisation</h2>
+      <h2>📍 Votre statut PMI actuel</h2>
       <div class="two-cols">
         <div class="field">
           <label for="roleChoice">🤝 Statut PMI</label>
@@ -81,7 +81,7 @@
           </select>
         </div>
         <div class="field">
-          <label for="roleAction">🛠 Action</label>
+          <label for="roleAction">🛠 Action (Mise à jour statut PMI)</label>
           <select id="roleAction" required disabled>
             <option value="add">Ajouter / mettre à jour</option>
             <option value="cancel">❌ Annuler</option>
@@ -93,21 +93,13 @@
       <p class="note">Pour annuler, renseignez seulement l'email ou le PMI ID déjà enregistré, choisissez le statut à annuler, puis cliquez sur ce bouton.</p>
       <div class="selected-zone" id="selectedZone">Aucune zone sélectionnée.</div>
 
-      <section class="survey-box">
-        <h2>⭐ Enquête de satisfaction</h2>
-        <div class="field">
-          <label for="surveyMonth">Mois</label>
-          <input id="surveyMonth" type="month" disabled>
+      <section class="form-totals">
+        <h2>Total général</h2>
+        <div class="totals">
+          <div><strong>💜 Membres</strong><span id="totalMembers">0</span></div>
+          <div><strong>🙋 Volontaires</strong><span id="totalVolunteers">0</span></div>
+          <div><strong>Personnes actives</strong><span id="totalUnique">0</span></div>
         </div>
-        <div class="stars" id="stars" aria-label="Satisfaction de 1 à 5 étoiles">
-          <button type="button" data-rating="1">☆</button>
-          <button type="button" data-rating="2">☆</button>
-          <button type="button" data-rating="3">☆</button>
-          <button type="button" data-rating="4">☆</button>
-          <button type="button" data-rating="5">☆</button>
-        </div>
-        <textarea id="comment" rows="4" placeholder="Commentaire"></textarea>
-        <button class="button primary" type="button" id="saveSurvey">⭐ Enregistrer la satisfaction</button>
       </section>
     </aside>
 
@@ -155,21 +147,29 @@
           <h2>🌍 Hors RDC</h2>
           <div class="continent-list" id="continentList"></div>
         </div>
-        <div class="panel">
-          <h2>Total général</h2>
-          <div class="totals">
-            <div><strong>💜 Membres</strong><span id="totalMembers">0</span></div>
-            <div><strong>🙋 Volontaires</strong><span id="totalVolunteers">0</span></div>
-            <div><strong>Personnes actives</strong><span id="totalUnique">0</span></div>
+        <section class="panel survey-box">
+          <h2>⭐ Enquête de satisfaction</h2>
+          <div class="field">
+            <label for="surveyMonth">Mois</label>
+            <input id="surveyMonth" type="month" disabled>
           </div>
-        </div>
+          <div class="stars" id="stars" aria-label="Satisfaction de 1 à 5 étoiles">
+            <button type="button" data-rating="1">☆</button>
+            <button type="button" data-rating="2">☆</button>
+            <button type="button" data-rating="3">☆</button>
+            <button type="button" data-rating="4">☆</button>
+            <button type="button" data-rating="5">☆</button>
+          </div>
+          <textarea id="comment" rows="4" placeholder="Commentaire"></textarea>
+          <button class="button primary" type="button" id="saveSurvey">⭐ Enregistrer la satisfaction</button>
+        </section>
       </div>
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260809-4"></script>
-  <script src="rdc-provinces-geojson.js?v=20260809-4"></script>
-  <script src="app.js?v=20260809-4"></script>
+  <script src="supabase-config.js?v=20260810-1"></script>
+  <script src="rdc-provinces-geojson.js?v=20260810-1"></script>
+  <script src="app.js?v=20260810-1"></script>
   <script>
     PMIMapApp.initHome();
   </script>

@@ -290,6 +290,11 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
   border-top: 1px solid var(--line);
 }
 
+.side-stack .survey-box {
+  padding-top: 16px;
+  border-top: 0;
+}
+
 .stars {
   display: flex;
   gap: 4px;
