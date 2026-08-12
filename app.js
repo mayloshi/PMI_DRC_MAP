@@ -357,6 +357,13 @@
     return role === 'member' ? 'membre' : 'volontaire';
   }
 
+  function roleChoiceLabel(value) {
+    if (value === 'member') return 'Membre';
+    if (value === 'volunteer') return 'Volontaire';
+    if (value === 'both') return 'Membre et volontaire';
+    return 'Non renseigné';
+  }
+
   function applyRoleOperation(profile, roleChoice, action, zoneName, zoneType) {
     const roles = selectedRoles(roleChoice);
     const now = new Date().toISOString();
@@ -820,6 +827,12 @@
       await refreshHome();
       await updateExistingActionState();
       setStatus(result.message, 'success');
+      showToast('Localisation enregistrée', [
+        `Email : ${profile.email || 'non renseigné'}`,
+        `PMI ID : ${profile.pmiId || 'non renseigné'}`,
+        `Statut PMI : ${roleChoiceLabel(roleChoice)}`,
+        `${zoneType} : ${zoneName}`
+      ]);
     } catch (error) {
       setStatus(error.message, 'error');
     }
@@ -951,6 +964,9 @@
         });
         await refreshHome();
         setStatus(previous ? 'Votre enquête de satisfaction précédente pour ce mois a été remplacée.' : 'Satisfaction mensuelle enregistrée.', 'success');
+        showToast('Satisfaction enregistrée', [
+          `Vote : ${rating}/5 étoile${rating > 1 ? 's' : ''}`
+        ]);
       } catch (error) {
         setStatus(error.message, 'error');
       }
@@ -1348,6 +1364,17 @@
     if (!box) return;
     box.className = `status ${type || ''}`;
     box.textContent = message;
+  }
+
+  function showToast(title, lines) {
+    const toast = document.getElementById('successToast');
+    if (!toast) return;
+    clearTimeout(window.pmiToastTimer);
+    toast.innerHTML = `<strong>${escapeHtml(title)}</strong>${lines.map(line => `<span>${escapeHtml(line)}</span>`).join('')}`;
+    toast.hidden = false;
+    window.pmiToastTimer = setTimeout(() => {
+      toast.hidden = true;
+    }, 5000);
   }
 
   function setDashboardStatus(message, type) {
