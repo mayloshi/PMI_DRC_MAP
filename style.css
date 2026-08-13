@@ -80,6 +80,7 @@ p {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .global-mood {
@@ -140,6 +141,26 @@ p {
   line-height: 1.35;
 }
 
+.loading-banner {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 21;
+  min-width: 210px;
+  padding: 12px 14px;
+  border: 1px solid #f6cfb8;
+  border-left: 5px solid var(--pmi-orange);
+  border-radius: 8px;
+  background: #fff7ef;
+  color: #71320b;
+  font-weight: 800;
+  box-shadow: 0 10px 24px rgba(25, 30, 45, .14);
+}
+
+.loading-banner[hidden] {
+  display: none;
+}
+
 .button, button {
   min-height: 40px;
   border: 1px solid var(--line);
@@ -173,6 +194,14 @@ p {
   color: var(--danger);
 }
 
+.icon-button {
+  width: 40px;
+  min-width: 40px;
+  padding: 0;
+  font-size: 28px;
+  line-height: 1;
+}
+
 button:disabled, .button:disabled, select:disabled {
   cursor: not-allowed;
   opacity: .55;
@@ -203,10 +232,36 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
 }
 
 .home-grid {
-  display: grid;
-  grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
-  gap: 18px;
   padding: 18px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 18;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 14px;
+  background: rgba(15, 22, 35, .42);
+  overflow: auto;
+}
+
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+.modal-panel {
+  width: min(720px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .panel {
@@ -273,6 +328,38 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
 .radio-row input {
   width: auto;
   height: auto;
+}
+
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.mode-switch label {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid #c6ccda;
+  border-radius: 7px;
+  background: #fff;
+  font-weight: 700;
+}
+
+.mode-switch input {
+  width: auto;
+  height: auto;
+}
+
+.form-mode-zone {
+  display: grid;
+  gap: 10px;
+}
+
+.form-mode-zone[hidden] {
+  display: none;
 }
 
 .two-cols {
@@ -349,7 +436,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
 
 .map-section {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
+  grid-template-columns: minmax(0, 1fr) 280px;
   gap: 18px;
   align-items: start;
 }
@@ -393,6 +480,23 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
 .dot.member { background: var(--member); }
 .dot.volunteer { background: var(--volunteer); }
 
+.map-totals {
+  padding: 12px 16px 0;
+}
+
+.map-totals .totals {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: grid;
+  gap: 10px;
+}
+
+.map-totals .totals div {
+  padding: 10px 12px;
+  border: 1px solid #edf0f6;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
 .map-wrap {
   padding: 12px;
   overflow: auto;
@@ -406,7 +510,7 @@ svg {
 }
 
 .province path {
-  stroke: #fff;
+  stroke: #ffffff;
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
   cursor: pointer;
@@ -432,6 +536,41 @@ svg {
 .map-label .count {
   fill: #4a5870;
   font-size: 10.5px;
+}
+
+.inside-label {
+  pointer-events: none;
+}
+
+.inside-label text {
+  fill: #1f2937;
+  font-size: 11px;
+  font-weight: 800;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, .9);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.inside-label .count {
+  fill: #465568;
+  font-size: 10px;
+}
+
+.status-bubble {
+  pointer-events: none;
+  stroke: #ffffff;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  opacity: .9;
+}
+
+.status-bubble.member {
+  fill: var(--member);
+}
+
+.status-bubble.volunteer {
+  fill: var(--volunteer);
 }
 
 .leader-line {
@@ -686,7 +825,7 @@ th {
 }
 
 @media (max-width: 1050px) {
-  .home-grid, .map-section, .dashboard-grid, .small-charts {
+  .map-section, .dashboard-grid, .small-charts {
     grid-template-columns: 1fr;
   }
 
@@ -715,6 +854,10 @@ th {
   }
 
   .two-cols, .kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .mode-switch, .map-totals .totals {
     grid-template-columns: 1fr;
   }
 

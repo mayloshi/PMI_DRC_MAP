@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Situation démographique des membres</title>
-  <link rel="stylesheet" href="style.css?v=20260812-1">
+  <link rel="stylesheet" href="style.css?v=20260813-1">
 </head>
 <body>
   <header class="topbar">
@@ -24,19 +24,26 @@
         <span id="yearMoodEmoji">-</span>
         <strong id="yearMoodScore">Annee 0.0/5</strong>
       </div>
+      <button class="button primary" type="button" id="openRegistration">Pas enregistré? Commencer ici</button>
       <a class="button secondary" href="dashboard.html">📊 Dashboard</a>
     </div>
   </header>
   <div class="toast" id="successToast" role="status" aria-live="polite" hidden></div>
+  <div class="loading-banner" id="loadingBanner" role="status" aria-live="polite" hidden>Chargement en cours...</div>
 
-  <main class="home-grid">
-    <aside class="panel form-panel">
+  <div class="modal-backdrop" id="registrationModal" hidden>
+    <section class="panel form-panel modal-panel" role="dialog" aria-modal="true" aria-labelledby="registrationTitle">
+      <div class="modal-header">
+        <h2 id="registrationTitle">Pas enregistré? Commencer ici</h2>
+        <button class="icon-button" type="button" id="closeRegistration" aria-label="Fermer">×</button>
+      </div>
       <section class="mini-tutorial">
         <h2>📌 Mini tutoriel</h2>
         <ol>
           <li>Renseignez votre email, PMI ID, sexe et statut.</li>
           <li>Choisissez membre, volontaire ou les deux.</li>
-          <li>Cliquez sur votre province ou votre continent hors RDC.</li>
+          <li>En mode interactif, cliquez sur la carte ou un continent.</li>
+          <li>En mode formulaire, choisissez une zone dans la liste.</li>
           <li>Ajoutez votre satisfaction du mois avec les étoiles.</li>
           <li>Utilisez l'annulation si vous devez retirer un choix.</li>
         </ol>
@@ -44,6 +51,10 @@
 
       <h2>Identification</h2>
       <div class="status" id="statusBox">Les compteurs se mettent à jour après chaque opération valide.</div>
+      <div class="mode-switch" role="group" aria-label="Mode de localisation">
+        <label><input type="radio" name="entryMode" value="interactive" checked> Mode interactif</label>
+        <label><input type="radio" name="entryMode" value="form"> Mode formulaire</label>
+      </div>
       <div class="field">
         <label for="email">📧 Email</label>
         <input id="email" type="email" autocomplete="email" required>
@@ -90,20 +101,23 @@
         </div>
       </div>
       <p class="note">Cliquez ensuite sur une province ou un continent. Si vous ajoutez un deuxième rôle plus tard, la nouvelle province remplace aussi la province du rôle déjà actif.</p>
+      <div class="form-mode-zone" id="formModeZone" hidden>
+        <div class="field">
+          <label for="zoneChoice">Province ou continent</label>
+          <select id="zoneChoice">
+            <option value="">Choisir une zone</option>
+          </select>
+        </div>
+        <button class="button primary" type="button" id="saveZoneChoice">Enregistrer la localisation</button>
+      </div>
+      <button class="button primary" type="button" id="useInteractiveMap">Utiliser la carte interactive</button>
       <button class="button secondary" type="button" id="applyCancel" disabled>❌ Appliquer une annulation</button>
       <p class="note">Pour annuler, renseignez seulement l'email ou le PMI ID déjà enregistré, choisissez le statut à annuler, puis cliquez sur ce bouton.</p>
       <div class="selected-zone" id="selectedZone">Aucune zone sélectionnée.</div>
+    </section>
+  </div>
 
-      <section class="form-totals">
-        <h2>Total général</h2>
-        <div class="totals">
-          <div><strong>💜 Membres</strong><span id="totalMembers">0</span></div>
-          <div><strong>🙋 Volontaires</strong><span id="totalVolunteers">0</span></div>
-          <div><strong>Personnes actives</strong><span id="totalUnique">0</span></div>
-        </div>
-      </section>
-    </aside>
-
+  <main class="home-grid">
     <section class="map-section">
       <div class="map-main">
       <div class="map-shell panel">
@@ -114,10 +128,19 @@
             <span><i class="dot volunteer"></i>🙋 Volontaires</span>
           </div>
         </div>
+        <section class="form-totals map-totals">
+          <h2>Total général</h2>
+          <div class="totals">
+            <div><strong>💜 Membres</strong><span id="totalMembers">0</span></div>
+            <div><strong>🙋 Volontaires</strong><span id="totalVolunteers">0</span></div>
+            <div><strong>Personnes actives</strong><span id="totalUnique">0</span></div>
+          </div>
+        </section>
         <div class="map-wrap">
           <svg viewBox="0 0 1160 820" role="img" aria-label="Carte cliquable de la RDC avec les 26 provinces">
             <rect x="0" y="0" width="1160" height="820" fill="#f7f9fc"></rect>
             <g id="provinceMap"></g>
+            <g id="provinceBubbles"></g>
             <g id="provinceLabels"></g>
           </svg>
         </div>
@@ -168,9 +191,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260812-1"></script>
-  <script src="rdc-provinces-geojson.js?v=20260812-1"></script>
-  <script src="app.js?v=20260812-1"></script>
+  <script src="supabase-config.js?v=20260813-1"></script>
+  <script src="rdc-provinces-geojson.js?v=20260813-1"></script>
+  <script src="app.js?v=20260813-1"></script>
   <script>
     PMIMapApp.initHome();
   </script>

@@ -32,8 +32,8 @@
   };
 
   const palette = [
-    '#4f17a8', '#00b5d1', '#ff671f', '#7aa6c2', '#59a14f', '#b07aa1',
-    '#f1ce63', '#86bc86', '#d4a6c8', '#9c755f', '#e15759', '#76b7b2'
+    '#e8eef2', '#eef6f8', '#f4f0f7', '#f6efe9', '#e1edf0', '#f2f4f6',
+    '#e6f3f5', '#f7f1ec', '#ece8f4', '#edf2f4', '#f5ede7', '#e7eff5'
   ];
 
   function provinces() {
@@ -485,6 +485,23 @@
     return [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2];
   }
 
+  function featureBox(feature, projection) {
+    const bounds = [Infinity, Infinity, -Infinity, -Infinity];
+    eachCoordinate(feature.geometry, coord => {
+      const point = projection(coord);
+      bounds[0] = Math.min(bounds[0], point[0]);
+      bounds[1] = Math.min(bounds[1], point[1]);
+      bounds[2] = Math.max(bounds[2], point[0]);
+      bounds[3] = Math.max(bounds[3], point[1]);
+    });
+    return {
+      x: bounds[0],
+      y: bounds[1],
+      width: bounds[2] - bounds[0],
+      height: bounds[3] - bounds[1]
+    };
+  }
+
   function eachCoordinate(geometry, callback) {
     if (geometry.type === 'Polygon') geometry.coordinates.forEach(ring => ring.forEach(callback));
     if (geometry.type === 'MultiPolygon') geometry.coordinates.forEach(polygon => polygon.forEach(ring => ring.forEach(callback)));
@@ -497,6 +514,7 @@
     const projection = createProjection(window.RDC_PROVINCES_GEOJSON);
     const items = provinces().map(province => {
       const center = featureCenter(province.feature, projection);
+      const box = featureBox(province.feature, projection);
       const group = createSvgElement('g', { class: 'province' });
       const shape = createSvgElement('path', {
         d: featureToPath(province.feature, projection),
@@ -518,16 +536,53 @@
       });
       group.appendChild(shape);
       root.appendChild(group);
-      return { province, center };
+      return { province, center, box };
     });
     drawLabels(items, labels);
+    drawStatusBubbles(items);
   }
 
   function drawLabels(items, labelsRoot) {
-    const left = items.filter(item => item.center[0] < 580).sort((a, b) => a.center[1] - b.center[1]);
-    const right = items.filter(item => item.center[0] >= 580).sort((a, b) => a.center[1] - b.center[1]);
+    const outside = [];
+    items.forEach(item => {
+      if (canUseInsideLabel(item)) {
+        drawInsideLabel(item, labelsRoot);
+      } else {
+        outside.push(item);
+      }
+    });
+    const left = outside.filter(item => item.center[0] < 580).sort((a, b) => a.center[1] - b.center[1]);
+    const right = outside.filter(item => item.center[0] >= 580).sort((a, b) => a.center[1] - b.center[1]);
     placeLabels(left, 16, labelsRoot);
     placeLabels(right, 1148, labelsRoot);
+  }
+
+  function canUseInsideLabel(item) {
+    const name = shortName(item.province.name);
+    const enoughWidth = item.box.width >= Math.max(86, name.length * 7.1);
+    const enoughHeight = item.box.height >= 54;
+    return enoughWidth && enoughHeight;
+  }
+
+  function drawInsideLabel(item, labelsRoot) {
+    const group = createSvgElement('g', { class: 'inside-label', 'data-label': item.province.name });
+    const name = createSvgElement('text', {
+      x: item.center[0].toFixed(1),
+      y: (item.center[1] - 6).toFixed(1),
+      'text-anchor': 'middle'
+    });
+    name.textContent = shortName(item.province.name);
+    const count = createSvgElement('text', {
+      x: item.center[0].toFixed(1),
+      y: (item.center[1] + 10).toFixed(1),
+      class: 'count',
+      'text-anchor': 'middle',
+      'data-zone-count': item.province.name
+    });
+    count.textContent = 'M: 0 | V: 0';
+    group.appendChild(name);
+    group.appendChild(count);
+    labelsRoot.appendChild(group);
   }
 
   function placeLabels(items, x, labelsRoot) {
@@ -553,6 +608,32 @@
       group.addEventListener('click', () => document.querySelector(`[aria-label="${cssEscape(item.province.name)}"]`)?.dispatchEvent(new Event('click')));
       labelsRoot.appendChild(line);
       labelsRoot.appendChild(group);
+    });
+  }
+
+  function drawStatusBubbles(items) {
+    const root = document.getElementById('provinceBubbles');
+    if (!root) return;
+    root.innerHTML = '';
+    items.forEach(item => {
+      const offset = Math.min(8, Math.max(5, item.box.width / 9));
+      const cy = Math.min(item.box.y + item.box.height - 15, item.center[1] + Math.min(20, item.box.height / 4));
+      const member = createSvgElement('circle', {
+        class: 'status-bubble member',
+        cx: (item.center[0] - offset).toFixed(1),
+        cy: cy.toFixed(1),
+        r: 0,
+        'data-member-bubble': item.province.name
+      });
+      const volunteer = createSvgElement('circle', {
+        class: 'status-bubble volunteer',
+        cx: (item.center[0] + offset).toFixed(1),
+        cy: cy.toFixed(1),
+        r: 0,
+        'data-volunteer-bubble': item.province.name
+      });
+      root.appendChild(member);
+      root.appendChild(volunteer);
     });
   }
 
@@ -586,6 +667,29 @@
     });
   }
 
+  function initZoneSelect() {
+    const select = document.getElementById('zoneChoice');
+    if (!select) return;
+    const provinceGroup = document.createElement('optgroup');
+    provinceGroup.label = 'Provinces RDC';
+    provinces().forEach(province => {
+      const option = document.createElement('option');
+      option.value = `Province|${province.name}`;
+      option.textContent = province.name;
+      provinceGroup.appendChild(option);
+    });
+    const continentGroup = document.createElement('optgroup');
+    continentGroup.label = 'Continents hors RDC';
+    continents.forEach(name => {
+      const option = document.createElement('option');
+      option.value = `Continent|${name}`;
+      option.textContent = name;
+      continentGroup.appendChild(option);
+    });
+    select.appendChild(provinceGroup);
+    select.appendChild(continentGroup);
+  }
+
   async function refreshHome() {
     const profiles = await loadProfiles();
     const satisfaction = await loadSatisfaction();
@@ -597,6 +701,10 @@
 
   function renderCounts(stats) {
     const total = totals(stats);
+    const maxProvinceValue = Math.max(1, ...provinces().flatMap(province => {
+      const item = stats[province.name] || { members: 0, volunteers: 0 };
+      return [item.members, item.volunteers];
+    }));
     setText('totalMembers', total.members);
     setText('totalVolunteers', total.volunteers);
     setText('totalUnique', total.people);
@@ -607,9 +715,20 @@
       document.querySelectorAll(`[data-province-shape="${cssEscape(name)}"] title`).forEach(el => {
         el.textContent = `${name} - Membres: ${item.members} | Volontaires: ${item.volunteers}`;
       });
+      document.querySelectorAll(`[data-member-bubble="${cssEscape(name)}"]`).forEach(el => {
+        el.setAttribute('r', bubbleRadius(item.members, maxProvinceValue));
+      });
+      document.querySelectorAll(`[data-volunteer-bubble="${cssEscape(name)}"]`).forEach(el => {
+        el.setAttribute('r', bubbleRadius(item.volunteers, maxProvinceValue));
+      });
       const continent = document.querySelector(`[data-continent="${cssEscape(name)}"]`);
       if (continent) continent.textContent = `M: ${item.members} | V: ${item.volunteers}`;
     });
+  }
+
+  function bubbleRadius(value, max) {
+    if (!value) return 0;
+    return (4 + Math.sqrt(value / max) * 7).toFixed(1);
   }
 
   function renderGlobalMood(items) {
@@ -799,6 +918,8 @@
 
   async function handleZone(zoneName, zoneType) {
     setText('selectedZone', `Zone sélectionnée : ${zoneName}`);
+    setStatus('Enregistrement en cours...', '');
+    setBusy(true, 'Enregistrement en cours...');
     try {
       const identity = readIdentity();
       const roleChoice = document.getElementById('roleChoice').value;
@@ -833,12 +954,18 @@
         `Statut PMI : ${roleChoiceLabel(roleChoice)}`,
         `${zoneType} : ${zoneName}`
       ]);
+      closeRegistrationModal();
     } catch (error) {
       setStatus(error.message, 'error');
+      openRegistrationModal();
+    } finally {
+      setBusy(false);
     }
   }
 
   async function handleCancel() {
+    setStatus('Enregistrement en cours...', '');
+    setBusy(true, 'Enregistrement en cours...');
     try {
       const identity = readIdentityForLookup();
       const roleChoice = document.getElementById('roleChoice').value;
@@ -876,10 +1003,14 @@
       setStatus(hasActiveRole ? result.message : "Annulation effectuée et entrée supprimée de la base de données.", 'success');
     } catch (error) {
       setStatus(error.message, 'error');
+    } finally {
+      setBusy(false);
     }
   }
 
   async function updateProfileInfo() {
+    setStatus('Enregistrement en cours...', '');
+    setBusy(true, 'Enregistrement en cours...');
     try {
       const identity = readIdentity();
       const profiles = await loadProfiles();
@@ -900,6 +1031,8 @@
       setStatus('Sexe/statut mis à jour.', 'success');
     } catch (error) {
       setStatus(error.message, 'error');
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -935,13 +1068,65 @@
     return () => rating;
   }
 
+  function initRegistrationModal() {
+    const open = document.getElementById('openRegistration');
+    const close = document.getElementById('closeRegistration');
+    const modal = document.getElementById('registrationModal');
+    if (!open || !close || !modal) return;
+    open.addEventListener('click', openRegistrationModal);
+    close.addEventListener('click', closeRegistrationModal);
+    modal.addEventListener('click', event => {
+      if (event.target === modal) closeRegistrationModal();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !modal.hidden) closeRegistrationModal();
+    });
+  }
+
+  function openRegistrationModal() {
+    const modal = document.getElementById('registrationModal');
+    if (!modal) return;
+    modal.hidden = false;
+    setTimeout(() => document.getElementById('email')?.focus(), 0);
+  }
+
+  function closeRegistrationModal() {
+    const modal = document.getElementById('registrationModal');
+    if (modal) modal.hidden = true;
+  }
+
+  function initEntryMode() {
+    const zone = document.getElementById('formModeZone');
+    const interactiveButton = document.getElementById('useInteractiveMap');
+    if (!zone) return;
+    const sync = () => {
+      const mode = checkedValue('entryMode');
+      zone.hidden = mode !== 'form';
+      if (interactiveButton) interactiveButton.hidden = mode !== 'interactive';
+      const note = mode === 'form'
+        ? 'Mode formulaire : choisissez une province ou un continent dans la liste, puis enregistrez.'
+        : 'Mode interactif : cliquez directement sur une province ou un continent.';
+      setText('selectedZone', note);
+    };
+    document.querySelectorAll('input[name="entryMode"]').forEach(input => {
+      input.addEventListener('change', sync);
+    });
+    if (interactiveButton) interactiveButton.addEventListener('click', closeRegistrationModal);
+    sync();
+  }
+
   async function initHome() {
     const month = document.getElementById('surveyMonth');
     if (month) month.value = currentPeriod();
     initMap(handleZone);
     initContinents(handleZone);
+    initZoneSelect();
+    initRegistrationModal();
+    initEntryMode();
     const getRating = setupStars();
     document.getElementById('saveSurvey').addEventListener('click', async () => {
+      setStatus('Enregistrement en cours...', '');
+      setBusy(true, 'Enregistrement en cours...');
       try {
         const identity = readIdentity();
         const rating = getRating();
@@ -969,14 +1154,35 @@
         ]);
       } catch (error) {
         setStatus(error.message, 'error');
+        openRegistrationModal();
+      } finally {
+        setBusy(false);
       }
+    });
+    document.getElementById('saveZoneChoice').addEventListener('click', async () => {
+      const value = document.getElementById('zoneChoice').value;
+      if (!value) {
+        setStatus('Choisissez une province ou un continent.', 'error');
+        return;
+      }
+      const [zoneType, zoneName] = value.split('|');
+      await handleZone(zoneName, zoneType);
     });
     document.getElementById('applyCancel').addEventListener('click', handleCancel);
     document.getElementById('updateProfileInfo').addEventListener('click', updateProfileInfo);
     document.getElementById('email').addEventListener('input', scheduleExistingActionState);
     document.getElementById('pmiId').addEventListener('input', scheduleExistingActionState);
-    await refreshHome();
-    await updateExistingActionState();
+    setStatus('Chargement en cours...', '');
+    setBusy(true, 'Chargement en cours...');
+    try {
+      await refreshHome();
+      await updateExistingActionState();
+      setStatus('Les compteurs se mettent à jour après chaque opération valide.', '');
+    } catch (error) {
+      setStatus(error.message, 'error');
+    } finally {
+      setBusy(false);
+    }
     if (!window.pmiHomeRefreshTimer) {
       window.pmiHomeRefreshTimer = setInterval(() => refreshHome().catch(error => setStatus(error.message, 'error')), 30000);
     }
@@ -1364,6 +1570,25 @@
     if (!box) return;
     box.className = `status ${type || ''}`;
     box.textContent = message;
+  }
+
+  function setBusy(isBusy, message) {
+    const banner = document.getElementById('loadingBanner');
+    if (banner) {
+      banner.textContent = message || 'Chargement en cours...';
+      banner.hidden = !isBusy;
+    }
+    document.querySelectorAll('#registrationModal button, #registrationModal input, #registrationModal select, #registrationModal textarea, #saveSurvey')
+      .forEach(el => {
+        if (el.id === 'closeRegistration') return;
+        if (isBusy) {
+          if (!el.disabled) el.dataset.busyDisabled = 'true';
+          el.disabled = true;
+        } else if (el.dataset.busyDisabled === 'true') {
+          el.disabled = false;
+          delete el.dataset.busyDisabled;
+        }
+      });
   }
 
   function showToast(title, lines) {
