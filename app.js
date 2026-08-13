@@ -698,40 +698,37 @@
     const root = document.getElementById('continentList');
     if (!root) return;
     root.innerHTML = `
-      <svg viewBox="0 0 360 210" role="img" aria-label="Carte du monde cliquable hors RDC">
-        <rect class="world-ocean" x="4" y="8" width="352" height="190" rx="14"></rect>
+      <svg viewBox="0 0 1920 1080" role="img" aria-label="Carte du monde cliquable hors RDC">
+        <image href="assets/world-map-freepik.jpg" x="0" y="0" width="1920" height="1080" preserveAspectRatio="xMidYMid meet"></image>
         <g class="world-zone" data-world-zone="Amérique du Nord" tabindex="0" role="button" aria-label="Amérique du Nord">
-          <path class="world-continent" d="M42 61 C53 38 83 33 106 43 C128 34 149 47 146 70 C135 79 126 92 112 94 C101 105 83 95 70 101 C58 91 41 87 42 61 Z"></path>
-          <text class="world-label" x="92" y="68">Amérique</text>
-          <text class="world-label" x="92" y="82">du Nord</text>
-          <text class="world-count" x="92" y="98" data-continent="Amérique du Nord">M: 0 | V: 0</text>
+          <rect class="world-hit-area" x="90" y="245" width="555" height="350" rx="28"></rect>
+          <text class="world-label" x="390" y="392">Amérique du Nord</text>
+          <text class="world-count" x="390" y="430" data-continent="Amérique du Nord">M: 0 | V: 0</text>
         </g>
         <g class="world-zone" data-world-zone="Amérique latine" tabindex="0" role="button" aria-label="Amérique latine">
-          <path class="world-continent" d="M126 104 C144 112 151 128 145 146 C139 162 151 174 135 190 C124 179 122 164 111 153 C101 142 108 125 118 116 Z"></path>
-          <text class="world-label" x="126" y="134">Amérique</text>
-          <text class="world-label" x="126" y="148">latine</text>
-          <text class="world-count" x="126" y="164" data-continent="Amérique latine">M: 0 | V: 0</text>
+          <rect class="world-hit-area" x="430" y="580" width="320" height="420" rx="28"></rect>
+          <text class="world-label" x="585" y="742">Amérique latine</text>
+          <text class="world-count" x="585" y="780" data-continent="Amérique latine">M: 0 | V: 0</text>
         </g>
         <g class="world-zone" data-world-zone="Europe" tabindex="0" role="button" aria-label="Europe">
-          <path class="world-continent" d="M171 54 C186 39 216 43 222 61 C213 76 190 78 175 72 C164 69 162 61 171 54 Z"></path>
-          <text class="world-label" x="195" y="62">Europe</text>
-          <text class="world-count" x="195" y="78" data-continent="Europe">M: 0 | V: 0</text>
+          <rect class="world-hit-area" x="830" y="250" width="300" height="230" rx="26"></rect>
+          <text class="world-label" x="982" y="352">Europe</text>
+          <text class="world-count" x="982" y="390" data-continent="Europe">M: 0 | V: 0</text>
         </g>
         <g class="world-zone" data-world-zone="Afrique hors RDC" tabindex="0" role="button" aria-label="Afrique hors RDC">
-          <path class="world-continent" d="M188 83 C212 74 233 88 236 113 C245 133 232 160 209 166 C189 152 174 127 178 104 C179 94 181 88 188 83 Z"></path>
-          <text class="world-label" x="207" y="111">Afrique</text>
-          <text class="world-label" x="207" y="125">hors RDC</text>
-          <text class="world-count" x="207" y="142" data-continent="Afrique hors RDC">M: 0 | V: 0</text>
+          <rect class="world-hit-area" x="820" y="455" width="380" height="500" rx="28"></rect>
+          <text class="world-label" x="1010" y="650">Afrique hors RDC</text>
+          <text class="world-count" x="1010" y="688" data-continent="Afrique hors RDC">M: 0 | V: 0</text>
         </g>
         <g class="world-zone" data-world-zone="Asie" tabindex="0" role="button" aria-label="Asie">
-          <path class="world-continent" d="M229 56 C259 34 316 44 329 73 C310 88 310 112 287 116 C267 107 244 116 230 98 C218 85 219 68 229 56 Z"></path>
-          <text class="world-label" x="279" y="78">Asie</text>
-          <text class="world-count" x="279" y="94" data-continent="Asie">M: 0 | V: 0</text>
+          <rect class="world-hit-area" x="1080" y="250" width="650" height="420" rx="30"></rect>
+          <text class="world-label" x="1405" y="430">Asie</text>
+          <text class="world-count" x="1405" y="468" data-continent="Asie">M: 0 | V: 0</text>
         </g>
         <g class="world-zone" data-world-zone="Océanie" tabindex="0" role="button" aria-label="Océanie">
-          <path class="world-continent" d="M282 147 C300 137 328 144 337 160 C321 174 292 171 280 160 Z"></path>
-          <text class="world-label" x="310" y="156">Océanie</text>
-          <text class="world-count" x="310" y="172" data-continent="Océanie">M: 0 | V: 0</text>
+          <rect class="world-hit-area" x="1435" y="680" width="360" height="250" rx="28"></rect>
+          <text class="world-label" x="1615" y="792">Océanie</text>
+          <text class="world-count" x="1615" y="830" data-continent="Océanie">M: 0 | V: 0</text>
         </g>
       </svg>
     `;
