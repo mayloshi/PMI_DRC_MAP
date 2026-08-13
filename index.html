@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Situation démographique des membres</title>
-  <link rel="stylesheet" href="style.css?v=20260813-1">
+  <link rel="stylesheet" href="style.css?v=20260813-2">
 </head>
 <body>
   <header class="topbar">
@@ -22,9 +22,8 @@
       </div>
       <div class="global-mood" title="Satisfaction depuis le début de l'année">
         <span id="yearMoodEmoji">-</span>
-        <strong id="yearMoodScore">Annee 0.0/5</strong>
+        <strong id="yearMoodScore">Année 0.0/5</strong>
       </div>
-      <button class="button primary" type="button" id="openRegistration">Pas enregistré? Commencer ici</button>
       <a class="button secondary" href="dashboard.html">📊 Dashboard</a>
     </div>
   </header>
@@ -121,6 +120,7 @@
     <section class="map-section">
       <div class="map-main">
       <div class="map-shell panel">
+        <button class="button primary map-float-action" type="button" id="openRegistration">Pas enregistré? Commencer ici</button>
         <div class="map-toolbar">
           <h2>RDC - 26 provinces</h2>
           <div class="legend">
@@ -191,9 +191,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260813-1"></script>
-  <script src="rdc-provinces-geojson.js?v=20260813-1"></script>
-  <script src="app.js?v=20260813-1"></script>
+  <script src="supabase-config.js?v=20260813-2"></script>
+  <script src="rdc-provinces-geojson.js?v=20260813-2"></script>
+  <script src="app.js?v=20260813-2"></script>
   <script>
     PMIMapApp.initHome();
   </script>

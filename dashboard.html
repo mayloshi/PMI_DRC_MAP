@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Situation démographique des membres</title>
-  <link rel="stylesheet" href="style.css?v=20260813-1">
+  <link rel="stylesheet" href="style.css?v=20260813-2">
 </head>
 <body>
   <header class="topbar">
@@ -22,7 +22,7 @@
 
   <main class="dashboard-page">
     <section class="panel password-panel" id="passwordPanel">
-      <h2>Acces dashboard</h2>
+      <h2>Accès dashboard</h2>
       <div class="field">
         <label for="dashboardPassword">Mot de passe</label>
         <input id="dashboardPassword" type="password" autocomplete="current-password">
@@ -44,7 +44,7 @@
             <input id="supabaseAnon" placeholder="eyJ...">
           </div>
           <div class="button-row">
-            <button class="button secondary" type="button" id="downloadConfig">Generer supabase-config.js</button>
+            <button class="button secondary" type="button" id="downloadConfig">Générer supabase-config.js</button>
           </div>
           <div class="status" id="dbConnectionStatus"></div>
           <textarea id="configPreview" rows="5" readonly></textarea>
@@ -98,7 +98,11 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Période</th><th>Moyenne</th><th>Niko-niko</th><th>Commentaires</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Période</th><th>Email</th><th>PMI ID</th><th>Vote</th><th>Niko-niko</th><th>Commentaire</th><th>Contact</th><th>Action</th>
+              </tr>
+            </thead>
             <tbody id="nikoBody"></tbody>
           </table>
         </div>
@@ -139,9 +143,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260813-1"></script>
-  <script src="rdc-provinces-geojson.js?v=20260813-1"></script>
-  <script src="app.js?v=20260813-1"></script>
+  <script src="supabase-config.js?v=20260813-2"></script>
+  <script src="rdc-provinces-geojson.js?v=20260813-2"></script>
+  <script src="app.js?v=20260813-2"></script>
   <script>
     PMIMapApp.initDashboard();
   </script>

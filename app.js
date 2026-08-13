@@ -6,19 +6,27 @@
   const continents = [
     'Afrique hors RDC',
     'Europe',
-    'Amerique du Nord',
-    'Amerique latine',
+    'Amérique du Nord',
+    'Amérique latine',
     'Asie',
-    'Oceanie'
+    'Océanie'
   ];
 
   const continentGlobes = {
     'Afrique hors RDC': '🌍',
     Europe: '🌍',
-    'Amerique du Nord': '🌎',
-    'Amerique latine': '🌎',
+    'Amérique du Nord': '🌎',
+    'Amérique latine': '🌎',
     Asie: '🌏',
-    Oceanie: '🌏'
+    'Océanie': '🌏'
+  };
+
+  const zoneAliases = {
+    Amerique: 'Amérique',
+    'Amerique du Nord': 'Amérique du Nord',
+    'Amerique latine': 'Amérique latine',
+    Oceanie: 'Océanie',
+    Equateur: 'Équateur'
   };
 
   const provinceNameMap = {
@@ -27,8 +35,8 @@
     'North Kivu': 'Nord-Kivu',
     'South Kivu': 'Sud-Kivu',
     'Upper Uele': 'Haut-Uele',
-    'Équateur': 'Equateur',
-    'Ã‰quateur': 'Equateur'
+    'Équateur': 'Équateur',
+    'Ã‰quateur': 'Équateur'
   };
 
   const palette = [
@@ -118,7 +126,7 @@
       headers: Object.assign({}, supabaseHeaders(), { Prefer: 'resolution=merge-duplicates' }),
       body: JSON.stringify(body)
     });
-    if (!response.ok) throw new Error(await supabaseError(response, 'Supabase a refus? la mise ? jour du profil.'));
+    if (!response.ok) throw new Error(await supabaseError(response, 'Supabase a refusé la mise à jour du profil.'));
   }
 
   async function deleteProfile(identityValue) {
@@ -132,7 +140,7 @@
       method: 'DELETE',
       headers: supabaseHeaders()
     });
-    if (!response.ok) throw new Error(await supabaseError(response, 'La suppression Supabase a echoue.'));
+    if (!response.ok) throw new Error(await supabaseError(response, 'La suppression Supabase a échoué.'));
     writeJson(PROFILE_KEY, profiles);
     return profiles;
   }
@@ -145,9 +153,9 @@
     }
     const headers = supabaseHeaders();
     const satisfactionResponse = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?id=not.is.null`, { method: 'DELETE', headers });
-    if (!satisfactionResponse.ok) throw new Error(await supabaseError(satisfactionResponse, 'La suppression des satisfactions Supabase a echoue.'));
+    if (!satisfactionResponse.ok) throw new Error(await supabaseError(satisfactionResponse, 'La suppression des satisfactions Supabase a échoué.'));
     const profileResponse = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_profiles?id=not.is.null`, { method: 'DELETE', headers });
-    if (!profileResponse.ok) throw new Error(await supabaseError(profileResponse, 'La suppression des profils Supabase a echoue.'));
+    if (!profileResponse.ok) throw new Error(await supabaseError(profileResponse, 'La suppression des profils Supabase a échoué.'));
     localStorage.removeItem(PROFILE_KEY);
     localStorage.removeItem(SAT_KEY);
   }
@@ -200,13 +208,44 @@
         headers: Object.assign({}, supabaseHeaders(), { Prefer: 'resolution=merge-duplicates' }),
         body: JSON.stringify(row)
       });
-      if (!response.ok) throw new Error(await supabaseError(response, 'Supabase a refuse la satisfaction.'));
+      if (!response.ok) throw new Error(await supabaseError(response, 'Supabase a refusé la satisfaction.'));
     }
     const items = readJson(SAT_KEY, []);
     const index = items.findIndex(existing => sameSatisfactionIdentity(existing, item) && existing.period === item.period);
     if (index >= 0) items[index] = Object.assign({}, items[index], item);
     else items.push(item);
     writeJson(SAT_KEY, items);
+  }
+
+  async function deleteSatisfaction(item) {
+    const items = (await loadSatisfaction()).filter(existing => !sameSatisfactionRecord(existing, item));
+    if (!isSupabaseConfigured()) {
+      writeJson(SAT_KEY, items);
+      return items;
+    }
+    const target = satisfactionDeleteFilter(item);
+    const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_satisfaction?${target}`, {
+      method: 'DELETE',
+      headers: supabaseHeaders()
+    });
+    if (!response.ok) throw new Error(await supabaseError(response, 'La suppression de la satisfaction Supabase a échoué.'));
+    writeJson(SAT_KEY, items);
+    return items;
+  }
+
+  function sameSatisfactionRecord(a, b) {
+    if (a.id && b.id) return a.id === b.id;
+    return sameSatisfactionIdentity(a, b) && a.period === b.period;
+  }
+
+  function satisfactionDeleteFilter(item) {
+    if (item.id) return `id=eq.${encodeURIComponent(item.id)}`;
+    const period = `period=eq.${encodeURIComponent(item.period)}`;
+    const email = normalizeEmail(item.email);
+    if (email) return `${period}&email=eq.${encodeURIComponent(email)}`;
+    const pmiId = normalizePmiId(item.pmiId);
+    if (pmiId) return `${period}&pmi_id=eq.${encodeURIComponent(pmiId)}`;
+    throw new Error('Impossible de supprimer cette satisfaction : email et PMI ID absents.');
   }
 
   function sameSatisfactionIdentity(a, b) {
@@ -414,13 +453,15 @@
 
     profiles.forEach(profile => {
       const activeZones = new Set();
-      if (profile.roles.member.active && zones[profile.roles.member.zoneName]) {
-        zones[profile.roles.member.zoneName].members += 1;
-        activeZones.add(profile.roles.member.zoneName);
+      const memberZone = normalizeZoneName(profile.roles.member.zoneName);
+      const volunteerZone = normalizeZoneName(profile.roles.volunteer.zoneName);
+      if (profile.roles.member.active && zones[memberZone]) {
+        zones[memberZone].members += 1;
+        activeZones.add(memberZone);
       }
-      if (profile.roles.volunteer.active && zones[profile.roles.volunteer.zoneName]) {
-        zones[profile.roles.volunteer.zoneName].volunteers += 1;
-        activeZones.add(profile.roles.volunteer.zoneName);
+      if (profile.roles.volunteer.active && zones[volunteerZone]) {
+        zones[volunteerZone].volunteers += 1;
+        activeZones.add(volunteerZone);
       }
       activeZones.forEach(zone => zones[zone].people += 1);
     });
@@ -738,7 +779,7 @@
     const yearAvg = average(items.filter(item => item.period && item.period.slice(0, 4) === year).map(item => item.rating));
     setText('monthMoodScore', `Mois ${monthAvg.toFixed(1)}/5`);
     setText('monthMoodEmoji', moodEmoji(monthAvg));
-    setText('yearMoodScore', `Annee ${yearAvg.toFixed(1)}/5`);
+    setText('yearMoodScore', `Année ${yearAvg.toFixed(1)}/5`);
     setText('yearMoodEmoji', moodEmoji(yearAvg));
   }
 
@@ -805,7 +846,7 @@
     const barW = 70;
     ctx.fillStyle = '#1b1f2a';
     ctx.font = '20px Aptos, Calibri, Tahoma, Arial';
-    ctx.fillText("Votes par nombre d'?toiles - moyenne annuelle arrondie par votant", left, 30);
+    ctx.fillText("Votes par nombre d'étoiles - moyenne annuelle arrondie par votant", left, 30);
     ctx.strokeStyle = '#d9deea';
     ctx.beginPath();
     ctx.moveTo(left - 20, bottom);
@@ -822,7 +863,7 @@
       ctx.textAlign = 'center';
       ctx.fillText(String(value), x + barW / 2, bottom - height - 8);
       ctx.font = '15px Aptos, Calibri, Tahoma, Arial';
-      ctx.fillText(`${rating} etoile${rating > 1 ? 's' : ''}`, x + barW / 2, bottom + 28);
+      ctx.fillText(`${rating} étoile${rating > 1 ? 's' : ''}`, x + barW / 2, bottom + 28);
     }
     ctx.textAlign = 'left';
   }
@@ -1021,7 +1062,7 @@
       profile.gender = identity.gender;
       profile.occupationStatus = identity.occupationStatus;
       await saveProfiles(profiles);
-      await logAction('mise ? jour profil', {
+      await logAction('mise à jour profil', {
         email: profile.email,
         pmiId: profile.pmiId,
         details: `Sexe: ${profile.gender}. Statut: ${profile.occupationStatus}.`
@@ -1145,7 +1186,7 @@
         await logAction('satisfaction', {
           email: identity.email,
           pmiId: identity.pmiId,
-          details: `P?riode: ${period}. Note: ${rating}/5.`
+          details: `Période: ${period}. Note: ${rating}/5.`
         });
         await refreshHome();
         setStatus(previous ? 'Votre enquête de satisfaction précédente pour ce mois a été remplacée.' : 'Satisfaction mensuelle enregistrée.', 'success');
@@ -1279,7 +1320,7 @@
     if (!box) return;
     if (!isSupabaseConfigured()) {
       box.className = 'status error';
-      box.textContent = 'Base non configur?e : les donn?es restent dans ce navigateur et ne sont pas partag?es.';
+      box.textContent = 'Base non configurée : les données restent dans ce navigateur et ne sont pas partagées.';
       return;
     }
     try {
@@ -1289,7 +1330,7 @@
       });
       if (!response.ok) throw new Error(await supabaseError(response, 'Lecture test Supabase impossible.'));
       box.className = 'status success';
-      box.textContent = 'Base configuree : la page lit et ecrit dans Supabase.';
+      box.textContent = 'Base configurée : la page lit et écrit dans Supabase.';
     } catch (error) {
       box.className = 'status error';
       box.textContent = error.message;
@@ -1304,8 +1345,8 @@
     refreshConfigPreview();
     updateDbConnectionStatus();
     downloadText(configFileContent(url, anonKey), 'supabase-config.js', 'application/javascript;charset=utf-8');
-    logAction('configuration supabase', { details: `Fichier config genere. URL: ${url || 'vide'}.` }).catch(() => {});
-    setDashboardStatus('Fichier supabase-config.js genere. Publiez ce fichier pour appliquer la configuration a tous les navigateurs.', 'success');
+    logAction('configuration supabase', { details: `Fichier config généré. URL: ${url || 'vide'}.` }).catch(() => {});
+    setDashboardStatus('Fichier supabase-config.js généré. Publiez ce fichier pour appliquer la configuration à tous les navigateurs.', 'success');
   }
 
   function configFileContent(url, anonKey) {
@@ -1326,7 +1367,7 @@
       setText('dashboardEmoji', moodEmoji(satAvg));
       drawProvinceChart('provinceChart', stats);
       drawPieChart('genderChart', countBy(profiles, 'gender'), 'Sexe');
-      drawPieChart('occupationChart', countBy(profiles, 'occupationStatus'), '?tudiant / Professionnel');
+      drawPieChart('occupationChart', countBy(profiles, 'occupationStatus'), 'Étudiant / Professionnel');
       renderNiko(satisfaction);
       renderProfiles(profiles);
       await renderLogs();
@@ -1408,24 +1449,64 @@
 
   function renderNiko(items) {
     const period = document.getElementById('nikoPeriod').value;
-    const groups = {};
-    items.forEach(item => {
-      const key = periodKey(item.period, period);
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(item);
-    });
     const body = document.getElementById('nikoBody');
     body.innerHTML = '';
-    Object.keys(groups).sort().forEach(key => {
-      const group = groups[key];
-      const avg = average(group.map(item => item.rating));
-      const comments = group.map(item => item.comment).filter(Boolean).join(' | ');
+    const rows = items
+      .slice()
+      .sort((a, b) => String(b.period || '').localeCompare(String(a.period || '')) || String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    window.pmiNikoRows = rows;
+    rows.forEach((item, index) => {
+      const key = periodKey(item.period, period);
       const tr = document.createElement('tr');
-      const commentLabel = comments ? `${group.filter(item => item.comment).length} commentaire(s)` : 'Aucun';
-      tr.innerHTML = `<td>${escapeHtml(key)}</td><td>${avg.toFixed(1)}</td><td>${moodEmoji(avg)}</td><td><span class="comment-tooltip" title="${escapeHtml(comments || 'Aucun commentaire')}">${escapeHtml(commentLabel)}</span></td>`;
+      const email = normalizeEmail(item.email);
+      const pmiId = normalizePmiId(item.pmiId);
+      const contact = email
+        ? `<a class="button email-action" href="${mailtoHref(item)}">Répondre par email</a>`
+        : '<span class="email-action disabled">Email absent</span>';
+      tr.innerHTML = `
+        <td>${escapeHtml(key)}<br><span class="mini-count">${escapeHtml(item.period || '')}</span></td>
+        <td>${escapeHtml(email || '')}</td>
+        <td>${escapeHtml(pmiId || '')}</td>
+        <td>${escapeHtml(item.rating)}/5</td>
+        <td>${moodEmoji(Number(item.rating))}</td>
+        <td>${escapeHtml(item.comment || 'Aucun commentaire')}</td>
+        <td>${contact}</td>
+        <td><button class="delete-click" type="button" data-delete-satisfaction="${index}">❌ Supprimer</button></td>
+      `;
       body.appendChild(tr);
     });
-    if (!body.children.length) body.innerHTML = '<tr><td colspan="4">Aucune satisfaction enregistr?e.</td></tr>';
+    body.querySelectorAll('[data-delete-satisfaction]').forEach(button => {
+      button.addEventListener('click', async () => {
+        const item = window.pmiNikoRows[Number(button.dataset.deleteSatisfaction)];
+        if (!item) return;
+        const label = item.email || item.pmiId || 'cette personne';
+        if (!confirm(`Supprimer la satisfaction de ${label} pour ${item.period} ?`)) return;
+        await deleteSatisfaction(item);
+        await logAction('suppression satisfaction', {
+          email: item.email,
+          pmiId: item.pmiId,
+          details: `Satisfaction supprimée. Période: ${item.period}. Note: ${item.rating}/5.`
+        });
+        await refreshDashboard();
+        setDashboardStatus('Satisfaction supprimée.', 'success');
+      });
+    });
+    if (!body.children.length) body.innerHTML = '<tr><td colspan="8">Aucune satisfaction enregistrée.</td></tr>';
+  }
+
+  function mailtoHref(item) {
+    const email = normalizeEmail(item.email);
+    const subject = `Enquête de satisfaction PMI RDC - ${item.period || ''}`;
+    const body = [
+      'Bonjour,',
+      '',
+      `Merci pour votre retour de satisfaction (${item.rating}/5).`,
+      item.comment ? `Votre commentaire : ${item.comment}` : '',
+      '',
+      'Bien cordialement,',
+      'Chapitre PMI RDC'
+    ].filter(line => line !== '').join('\n');
+    return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }
 
   function renderProfiles(profiles) {
@@ -1437,7 +1518,7 @@
         <td>${escapeHtml(profile.email)}</td>
         <td>${escapeHtml(profile.pmiId)}</td>
         <td>${profile.gender === 'M' ? '👨 M' : profile.gender === 'F' ? '👩 F' : ''}</td>
-        <td>${profile.occupationStatus === 'Etudiant' ? '🎓 Etudiant' : profile.occupationStatus === 'Professionnel' ? '💼 Professionnel' : ''}</td>
+        <td>${profile.occupationStatus === 'Etudiant' ? '🎓 Étudiant' : profile.occupationStatus === 'Professionnel' ? '💼 Professionnel' : ''}</td>
         <td>${roleText(profile.roles.member, '💜')}</td>
         <td>${roleText(profile.roles.volunteer, '🙋')}</td>
         <td><button class="delete-click" type="button" data-delete="${escapeHtml(profile.email || profile.pmiId)}">❌ Supprimer</button></td>
@@ -1477,7 +1558,7 @@
 
   function roleText(role, emoji) {
     if (!role.active) return 'Inactif';
-    return `${emoji} ${escapeHtml(role.zoneName)} (${escapeHtml(role.zoneType)})`;
+    return `${emoji} ${escapeHtml(normalizeZoneName(role.zoneName))} (${escapeHtml(role.zoneType)})`;
   }
 
   function periodKey(period, mode) {
@@ -1495,11 +1576,11 @@
         profile.email,
         profile.pmiId,
         profile.gender,
-        profile.occupationStatus,
+        profile.occupationStatus === 'Etudiant' ? 'Étudiant' : profile.occupationStatus,
         profile.roles.member.active ? 'Oui' : 'Non',
-        profile.roles.member.zoneName,
+        normalizeZoneName(profile.roles.member.zoneName),
         profile.roles.volunteer.active ? 'Oui' : 'Non',
-        profile.roles.volunteer.zoneName
+        normalizeZoneName(profile.roles.volunteer.zoneName)
       ])
     ];
     downloadText(rows.map(row => row.map(csvCell).join(',')).join('\n'), `PMI_RDC_dashboard_${today()}.csv`, 'text/csv;charset=utf-8');
@@ -1542,6 +1623,11 @@
 
   function normalizePmiId(value) {
     return String(value || '').trim().toUpperCase().replace(/\s+/g, '');
+  }
+
+  function normalizeZoneName(value) {
+    const name = String(value || '').trim();
+    return zoneAliases[name] || name;
   }
 
   function cryptoId() {
