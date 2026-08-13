@@ -697,14 +697,53 @@
   function initContinents(onZoneClick) {
     const root = document.getElementById('continentList');
     if (!root) return;
-    continents.forEach(name => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'continent';
-      button.dataset.zone = name;
-      button.innerHTML = `<span class="continent-main"><span class="continent-globe" aria-hidden="true">${continentGlobes[name] || '🌍'}</span><span><strong>${name}</strong><span class="mini-count" data-continent="${name}">M: 0 | V: 0</span></span></span><span>Choisir</span>`;
-      button.addEventListener('click', () => onZoneClick(name, 'Continent'));
-      root.appendChild(button);
+    root.innerHTML = `
+      <svg viewBox="0 0 360 210" role="img" aria-label="Carte du monde cliquable hors RDC">
+        <rect class="world-ocean" x="4" y="8" width="352" height="190" rx="14"></rect>
+        <g class="world-zone" data-world-zone="Amérique du Nord" tabindex="0" role="button" aria-label="Amérique du Nord">
+          <path class="world-continent" d="M42 61 C53 38 83 33 106 43 C128 34 149 47 146 70 C135 79 126 92 112 94 C101 105 83 95 70 101 C58 91 41 87 42 61 Z"></path>
+          <text class="world-label" x="92" y="68">Amérique</text>
+          <text class="world-label" x="92" y="82">du Nord</text>
+          <text class="world-count" x="92" y="98" data-continent="Amérique du Nord">M: 0 | V: 0</text>
+        </g>
+        <g class="world-zone" data-world-zone="Amérique latine" tabindex="0" role="button" aria-label="Amérique latine">
+          <path class="world-continent" d="M126 104 C144 112 151 128 145 146 C139 162 151 174 135 190 C124 179 122 164 111 153 C101 142 108 125 118 116 Z"></path>
+          <text class="world-label" x="126" y="134">Amérique</text>
+          <text class="world-label" x="126" y="148">latine</text>
+          <text class="world-count" x="126" y="164" data-continent="Amérique latine">M: 0 | V: 0</text>
+        </g>
+        <g class="world-zone" data-world-zone="Europe" tabindex="0" role="button" aria-label="Europe">
+          <path class="world-continent" d="M171 54 C186 39 216 43 222 61 C213 76 190 78 175 72 C164 69 162 61 171 54 Z"></path>
+          <text class="world-label" x="195" y="62">Europe</text>
+          <text class="world-count" x="195" y="78" data-continent="Europe">M: 0 | V: 0</text>
+        </g>
+        <g class="world-zone" data-world-zone="Afrique hors RDC" tabindex="0" role="button" aria-label="Afrique hors RDC">
+          <path class="world-continent" d="M188 83 C212 74 233 88 236 113 C245 133 232 160 209 166 C189 152 174 127 178 104 C179 94 181 88 188 83 Z"></path>
+          <text class="world-label" x="207" y="111">Afrique</text>
+          <text class="world-label" x="207" y="125">hors RDC</text>
+          <text class="world-count" x="207" y="142" data-continent="Afrique hors RDC">M: 0 | V: 0</text>
+        </g>
+        <g class="world-zone" data-world-zone="Asie" tabindex="0" role="button" aria-label="Asie">
+          <path class="world-continent" d="M229 56 C259 34 316 44 329 73 C310 88 310 112 287 116 C267 107 244 116 230 98 C218 85 219 68 229 56 Z"></path>
+          <text class="world-label" x="279" y="78">Asie</text>
+          <text class="world-count" x="279" y="94" data-continent="Asie">M: 0 | V: 0</text>
+        </g>
+        <g class="world-zone" data-world-zone="Océanie" tabindex="0" role="button" aria-label="Océanie">
+          <path class="world-continent" d="M282 147 C300 137 328 144 337 160 C321 174 292 171 280 160 Z"></path>
+          <text class="world-label" x="310" y="156">Océanie</text>
+          <text class="world-count" x="310" y="172" data-continent="Océanie">M: 0 | V: 0</text>
+        </g>
+      </svg>
+    `;
+    root.querySelectorAll('[data-world-zone]').forEach(zone => {
+      const name = zone.dataset.worldZone;
+      zone.addEventListener('click', () => onZoneClick(name, 'Continent'));
+      zone.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onZoneClick(name, 'Continent');
+        }
+      });
     });
   }
 
@@ -752,6 +791,9 @@
     Object.entries(stats).forEach(([name, item]) => {
       document.querySelectorAll(`[data-zone-count="${cssEscape(name)}"]`).forEach(el => {
         el.textContent = `M: ${item.members} | V: ${item.volunteers}`;
+      });
+      document.querySelectorAll(`[data-label="${cssEscape(name)}"]`).forEach(el => {
+        el.classList.toggle('empty-zone', item.members + item.volunteers === 0);
       });
       document.querySelectorAll(`[data-province-shape="${cssEscape(name)}"] title`).forEach(el => {
         el.textContent = `${name} - Membres: ${item.members} | Volontaires: ${item.volunteers}`;
@@ -1382,24 +1424,27 @@
     clearCanvas(ctx, canvas);
     const entries = provinces().map(province => [province.name, stats[province.name] || { members: 0, volunteers: 0 }]);
     const max = Math.max(1, ...entries.map(([, item]) => Math.max(item.members, item.volunteers)));
-    const pad = 48;
+    const pad = 42;
+    const chartTop = 66;
+    const chartBottom = canvas.height - 76;
+    const labelY = canvas.height - 34;
     const barW = Math.max(10, (canvas.width - pad * 2) / entries.length - 4);
     ctx.fillStyle = '#1b1f2a';
-    ctx.font = '20px Aptos, Calibri, Tahoma, Arial';
-    ctx.fillText('Membres et volontaires par province', pad, 30);
+    ctx.font = '18px Aptos, Calibri, Tahoma, Arial';
+    ctx.fillText('Membres et volontaires par province', pad, 28);
     entries.forEach(([name, item], index) => {
       const x = pad + index * (barW + 4);
-      const memberH = item.members / max * 330;
-      const volunteerH = item.volunteers / max * 330;
+      const memberH = item.members / max * (chartBottom - chartTop);
+      const volunteerH = item.volunteers / max * (chartBottom - chartTop);
       ctx.fillStyle = '#4f17a8';
-      ctx.fillRect(x, 420 - memberH, barW / 2, memberH);
+      ctx.fillRect(x, chartBottom - memberH, barW / 2, memberH);
       ctx.fillStyle = '#00b5d1';
-      ctx.fillRect(x + barW / 2, 420 - volunteerH, barW / 2, volunteerH);
+      ctx.fillRect(x + barW / 2, chartBottom - volunteerH, barW / 2, volunteerH);
       ctx.save();
-      ctx.translate(x + 2, 485);
+      ctx.translate(x + 2, labelY);
       ctx.rotate(-Math.PI / 3);
       ctx.fillStyle = '#344054';
-      ctx.font = '11px Aptos, Calibri, Tahoma, Arial';
+      ctx.font = '10px Aptos, Calibri, Tahoma, Arial';
       ctx.fillText(name, 0, 0);
       ctx.restore();
     });
@@ -1422,22 +1467,26 @@
     const total = entries.reduce((sum, [, value]) => sum + value, 0) || 1;
     let start = -Math.PI / 2;
     const colors = ['#4f17a8', '#00b5d1', '#ff671f', '#86bc86', '#d4a6c8'];
+    const radius = Math.min(canvas.width, canvas.height) * 0.28;
+    const centerX = Math.min(112, canvas.width * 0.32);
+    const centerY = canvas.height * 0.54;
+    const legendX = Math.min(canvas.width - 125, centerX + radius + 34);
     ctx.fillStyle = '#1b1f2a';
-    ctx.font = '18px Aptos, Calibri, Tahoma, Arial';
-    ctx.fillText(title, 22, 28);
+    ctx.font = '16px Aptos, Calibri, Tahoma, Arial';
+    ctx.fillText(title, 18, 26);
     entries.forEach(([label, value], index) => {
       const angle = value / total * Math.PI * 2;
       ctx.beginPath();
-      ctx.moveTo(150, 150);
-      ctx.arc(150, 150, 88, start, start + angle);
+      ctx.moveTo(centerX, centerY);
+      ctx.arc(centerX, centerY, radius, start, start + angle);
       ctx.closePath();
       ctx.fillStyle = colors[index % colors.length];
       ctx.fill();
       start += angle;
-      ctx.fillRect(290, 70 + index * 28, 14, 14);
+      ctx.fillRect(legendX, 58 + index * 26, 13, 13);
       ctx.fillStyle = '#1b1f2a';
-      ctx.font = '13px Aptos, Calibri, Tahoma, Arial';
-      ctx.fillText(`${label}: ${value}`, 312, 82 + index * 28);
+      ctx.font = '12px Aptos, Calibri, Tahoma, Arial';
+      ctx.fillText(`${label}: ${value}`, legendX + 20, 69 + index * 26);
     });
   }
 

@@ -550,6 +550,16 @@ svg {
   font-size: 10.5px;
 }
 
+.map-label.empty-zone rect {
+  fill: #f5f6f8;
+  stroke: #d7dce5;
+}
+
+.map-label.empty-zone text,
+.inside-label.empty-zone text {
+  fill: #98a2b3;
+}
+
 .inside-label {
   pointer-events: none;
 }
@@ -567,6 +577,10 @@ svg {
 .inside-label .count {
   fill: #465568;
   font-size: 10px;
+}
+
+.inside-label.empty-zone .count {
+  fill: #a3adbd;
 }
 
 .status-bubble {
@@ -608,39 +622,54 @@ svg {
   padding: 16px;
 }
 
-.continent-list {
-  display: grid;
-  gap: 9px;
-  margin-top: 14px;
+.world-map {
+  margin-top: 12px;
 }
 
-.continent {
+.world-map svg {
   width: 100%;
-  min-height: 62px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  text-align: left;
-}
-
-.continent-main {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   min-width: 0;
+  height: auto;
+  display: block;
 }
 
-.continent-globe {
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 44px;
-  font-size: 34px;
-  line-height: 1;
+.world-ocean {
+  fill: #f4f8fb;
+  stroke: #d3dde8;
+}
+
+.world-continent {
+  fill: #e9edf3;
+  stroke: #596273;
+  stroke-width: 1.2;
+  cursor: pointer;
+  transition: fill .15s ease, filter .15s ease;
+}
+
+.world-continent:hover,
+.world-continent:focus {
+  fill: #dcebf1;
+  filter: drop-shadow(0 4px 8px rgba(25, 30, 45, .18));
+  outline: none;
+}
+
+.world-label {
+  pointer-events: none;
+  fill: #263246;
+  font-size: 10.5px;
+  font-weight: 800;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, .86);
+  stroke-width: 3px;
+}
+
+.world-count {
+  pointer-events: none;
+  fill: #647084;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-anchor: middle;
 }
 
 .log-table-wrap {
@@ -762,6 +791,15 @@ canvas {
   height: auto;
   display: block;
   background: #fff;
+}
+
+.dashboard-page canvas {
+  max-height: 360px;
+  object-fit: contain;
+}
+
+.small-charts canvas {
+  max-height: 220px;
 }
 
 .home-charts {

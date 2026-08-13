@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Situation démographique des membres</title>
-  <link rel="stylesheet" href="style.css?v=20260813-2">
+  <link rel="stylesheet" href="style.css?v=20260813-3">
 </head>
 <body>
   <header class="topbar">
@@ -73,14 +73,14 @@
             <button class="button danger" type="button" id="resetAll">❌ Remise à zéro</button>
           </div>
         </div>
-        <canvas id="provinceChart" width="1200" height="520"></canvas>
+        <canvas id="provinceChart" width="1000" height="360"></canvas>
       </section>
 
       <section class="panel">
         <h2>Segmentation</h2>
         <div class="small-charts">
-          <canvas id="genderChart" width="500" height="280"></canvas>
-          <canvas id="occupationChart" width="500" height="280"></canvas>
+          <canvas id="genderChart" width="380" height="220"></canvas>
+          <canvas id="occupationChart" width="380" height="220"></canvas>
         </div>
       </section>
 
@@ -143,9 +143,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260813-2"></script>
-  <script src="rdc-provinces-geojson.js?v=20260813-2"></script>
-  <script src="app.js?v=20260813-2"></script>
+  <script src="supabase-config.js?v=20260813-3"></script>
+  <script src="rdc-provinces-geojson.js?v=20260813-3"></script>
+  <script src="app.js?v=20260813-3"></script>
   <script>
     PMIMapApp.initDashboard();
   </script>
