@@ -917,25 +917,31 @@
   function drawStarsHistogram(id, satisfaction) {
     const canvas = document.getElementById(id);
     if (!canvas) return;
+    const displayWidth = Math.max(520, Math.round(canvas.getBoundingClientRect().width || canvas.parentElement?.clientWidth || canvas.width));
+    const displayHeight = Math.max(360, Math.round(canvas.getBoundingClientRect().height || canvas.height));
+    const pixelRatio = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.round(displayWidth * pixelRatio);
+    canvas.height = Math.round(displayHeight * pixelRatio);
     const ctx = canvas.getContext('2d');
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     clearCanvas(ctx, canvas);
     const counts = yearlyRoundedRatingCounts(satisfaction);
     const max = Math.max(1, ...counts.slice(1));
-    const left = 92;
-    const right = canvas.width - 58;
-    const bottom = canvas.height - 82;
-    const top = 78;
+    const left = 44;
+    const right = displayWidth - 34;
+    const bottom = displayHeight - 76;
+    const top = 100;
     const step = (right - left) / 5;
-    const barW = Math.max(82, Math.min(150, step * .7));
+    const barW = Math.max(48, Math.min(96, step * .72));
     ctx.fillStyle = '#1b1f2a';
-    ctx.font = '22px Aptos, Calibri, Tahoma, Arial';
-    ctx.fillText("Votes par nombre d'étoiles", left, 30);
-    ctx.font = '15px Aptos, Calibri, Tahoma, Arial';
+    ctx.font = '700 28px Aptos, Calibri, Tahoma, Arial';
+    ctx.fillText("Votes par nombre d'étoiles", left, 34);
+    ctx.font = '18px Aptos, Calibri, Tahoma, Arial';
     ctx.fillStyle = '#556070';
-    ctx.fillText('Moyenne annuelle arrondie par votant', left, 54);
+    ctx.fillText('Moyenne annuelle arrondie par votant', left, 64);
     ctx.strokeStyle = '#d9deea';
     ctx.beginPath();
-    ctx.moveTo(left - 20, bottom);
+    ctx.moveTo(left - 12, bottom);
     ctx.lineTo(right, bottom);
     ctx.stroke();
     for (let rating = 1; rating <= 5; rating += 1) {
@@ -945,11 +951,13 @@
       ctx.fillStyle = '#ffb000';
       ctx.fillRect(x, bottom - height, barW, height);
       ctx.fillStyle = '#1b1f2a';
-      ctx.font = '18px Aptos, Calibri, Tahoma, Arial';
+      ctx.font = '700 24px Aptos, Calibri, Tahoma, Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(String(value), x + barW / 2, bottom - height - 8);
-      ctx.font = '17px Aptos, Calibri, Tahoma, Arial';
-      ctx.fillText(`${rating} étoile${rating > 1 ? 's' : ''}`, x + barW / 2, bottom + 34);
+      ctx.fillText(String(value), x + barW / 2, bottom - height - 10);
+      ctx.font = '700 22px Aptos, Calibri, Tahoma, Arial';
+      ctx.fillText(`${rating}`, x + barW / 2, bottom + 30);
+      ctx.font = '18px Aptos, Calibri, Tahoma, Arial';
+      ctx.fillText('étoile' + (rating > 1 ? 's' : ''), x + barW / 2, bottom + 54);
     }
     ctx.textAlign = 'left';
   }
