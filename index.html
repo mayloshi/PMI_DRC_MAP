@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Situation démographique des membres</title>
-  <link rel="stylesheet" href="style.css?v=20260813-6">
+  <link rel="stylesheet" href="style.css?v=20260813-7">
 </head>
 <body>
   <header class="topbar">
@@ -153,17 +153,13 @@
       <section class="panel home-charts">
         <h2>Histogrammes</h2>
         <div class="home-chart-grid">
-          <div>
+          <div class="wide-chart">
             <h3>Membres par province</h3>
-            <canvas id="homeMembersChart" width="1100" height="430"></canvas>
+            <canvas id="homeMembersChart" width="1500" height="430"></canvas>
           </div>
-          <div>
+          <div class="wide-chart">
             <h3>Volontaires par province</h3>
-            <canvas id="homeVolunteersChart" width="1100" height="430"></canvas>
-          </div>
-          <div>
-            <h3>Votes par nombre d'étoiles</h3>
-            <canvas id="homeStarsChart" width="900" height="320"></canvas>
+            <canvas id="homeVolunteersChart" width="1500" height="430"></canvas>
           </div>
         </div>
       </section>
@@ -190,14 +186,18 @@
           </div>
           <textarea id="comment" rows="4" placeholder="Commentaire"></textarea>
           <button class="button primary" type="button" id="saveSurvey">⭐ Enregistrer la satisfaction</button>
+          <div class="survey-chart">
+            <h3>Votes par nombre d'étoiles</h3>
+            <canvas id="homeStarsChart" width="1100" height="380"></canvas>
+          </div>
         </section>
       </div>
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260813-6"></script>
-  <script src="rdc-provinces-geojson.js?v=20260813-6"></script>
-  <script src="app.js?v=20260813-6"></script>
+  <script src="supabase-config.js?v=20260813-7"></script>
+  <script src="rdc-provinces-geojson.js?v=20260813-7"></script>
+  <script src="app.js?v=20260813-7"></script>
   <script>
     PMIMapApp.initHome();
   </script>

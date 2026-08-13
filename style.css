@@ -420,6 +420,22 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
   border-top: 0;
 }
 
+.survey-chart {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.survey-chart h3 {
+  margin: 0 0 8px;
+  color: #263246;
+  font-size: 16.5px;
+}
+
+.survey-chart canvas {
+  min-height: 260px;
+}
+
 .stars {
   display: flex;
   gap: 4px;
@@ -453,7 +469,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
 .registration-callout {
   position: absolute;
   top: 48px;
-  right: 12px;
+  left: 12px;
   z-index: 4;
   width: min(250px, calc(100% - 24px));
   display: grid;
@@ -878,8 +894,8 @@ canvas {
 
 .home-chart-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  grid-template-columns: 1fr;
+  gap: 16px;
   margin-top: 12px;
 }
 
@@ -898,6 +914,10 @@ canvas {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: 8px;
+}
+
+.wide-chart canvas {
+  min-height: 300px;
 }
 
 .table-wrap {
@@ -936,6 +956,14 @@ th {
   background: #fff7f7;
 }
 
+.niko-table th:first-child,
+.niko-table td:first-child {
+  width: 150px;
+  min-width: 150px;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
 .email-action {
   min-height: 28px;
   padding: 0 8px;
@@ -962,7 +990,7 @@ th {
 }
 
 @media (max-width: 1050px) {
-  .map-section, .dashboard-grid, .small-charts, .home-chart-grid {
+  .map-section, .dashboard-grid, .small-charts {
     grid-template-columns: 1fr;
   }
 
