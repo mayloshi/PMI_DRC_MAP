@@ -2,6 +2,7 @@
   const PROFILE_KEY = 'pmi-rdc-map-profiles-v2';
   const SAT_KEY = 'pmi-rdc-map-satisfaction-v1';
   const LOG_KEY = 'pmi-rdc-map-logs-v1';
+  const DASHBOARD_ACCESS_KEY = 'pmi-rdc-dashboard-access-v1';
 
   const continents = [
     'Afrique hors RDC',
@@ -65,6 +66,14 @@
 
   function dashboardPassword() {
     return (window.PMI_DRC_CONFIG && window.PMI_DRC_CONFIG.dashboardPassword) || '';
+  }
+
+  function dashboardAccessRemembered() {
+    return Boolean(dashboardPassword() && localStorage.getItem(DASHBOARD_ACCESS_KEY) === dashboardPassword());
+  }
+
+  function rememberDashboardAccess() {
+    if (dashboardPassword()) localStorage.setItem(DASHBOARD_ACCESS_KEY, dashboardPassword());
   }
 
   function isSupabaseConfigured() {
@@ -1305,13 +1314,14 @@
   async function initDashboard() {
     const password = document.getElementById('dashboardPassword');
     const unlock = document.getElementById('unlockDashboard');
-    unlock.addEventListener('click', async () => {
-      if (password.value !== dashboardPassword()) {
+    const openDashboard = async (remember, logAccess) => {
+      if (!remember && password.value !== dashboardPassword()) {
         setDashboardStatus('Mot de passe incorrect.', 'error');
         return;
       }
       setDashboardStatus('', '');
-      await logAction('dashboard acces', { details: 'Mot de passe valide.' });
+      rememberDashboardAccess();
+      if (logAccess) await logAction('dashboard acces', { details: 'Mot de passe valide.' });
       document.getElementById('passwordPanel').hidden = true;
       document.getElementById('dashboardContent').hidden = false;
       await loadDbConfigFields();
@@ -1320,10 +1330,16 @@
       if (!window.pmiDashboardRefreshTimer) {
         window.pmiDashboardRefreshTimer = setInterval(() => refreshDashboard().catch(error => setDashboardStatus(error.message, 'error')), 30000);
       }
+    };
+    unlock.addEventListener('click', async () => {
+      await openDashboard(false, true);
     });
     password.addEventListener('keydown', event => {
       if (event.key === 'Enter') unlock.click();
     });
+    if (dashboardAccessRemembered()) {
+      openDashboard(true, false).catch(error => setDashboardStatus(error.message, 'error'));
+    }
   }
 
   function bindDashboardActions() {
