@@ -907,7 +907,7 @@
       ctx.rotate(-Math.PI / 3);
       ctx.textAlign = 'right';
       ctx.fillStyle = '#344054';
-      ctx.font = '11px Aptos, Calibri, Tahoma, Arial';
+      ctx.font = '14px Aptos, Calibri, Tahoma, Arial';
       ctx.fillText(name, 0, 0);
       ctx.restore();
     });
@@ -921,15 +921,18 @@
     clearCanvas(ctx, canvas);
     const counts = yearlyRoundedRatingCounts(satisfaction);
     const max = Math.max(1, ...counts.slice(1));
-    const left = 86;
-    const right = canvas.width - 56;
-    const bottom = canvas.height - 72;
-    const top = 64;
+    const left = 92;
+    const right = canvas.width - 58;
+    const bottom = canvas.height - 82;
+    const top = 78;
     const step = (right - left) / 5;
-    const barW = Math.max(62, Math.min(115, step * .55));
+    const barW = Math.max(82, Math.min(150, step * .7));
     ctx.fillStyle = '#1b1f2a';
-    ctx.font = '20px Aptos, Calibri, Tahoma, Arial';
-    ctx.fillText("Votes par nombre d'étoiles - moyenne annuelle arrondie par votant", left, 30);
+    ctx.font = '22px Aptos, Calibri, Tahoma, Arial';
+    ctx.fillText("Votes par nombre d'étoiles", left, 30);
+    ctx.font = '15px Aptos, Calibri, Tahoma, Arial';
+    ctx.fillStyle = '#556070';
+    ctx.fillText('Moyenne annuelle arrondie par votant', left, 54);
     ctx.strokeStyle = '#d9deea';
     ctx.beginPath();
     ctx.moveTo(left - 20, bottom);
@@ -942,11 +945,11 @@
       ctx.fillStyle = '#ffb000';
       ctx.fillRect(x, bottom - height, barW, height);
       ctx.fillStyle = '#1b1f2a';
-      ctx.font = '16px Aptos, Calibri, Tahoma, Arial';
+      ctx.font = '18px Aptos, Calibri, Tahoma, Arial';
       ctx.textAlign = 'center';
       ctx.fillText(String(value), x + barW / 2, bottom - height - 8);
-      ctx.font = '15px Aptos, Calibri, Tahoma, Arial';
-      ctx.fillText(`${rating} étoile${rating > 1 ? 's' : ''}`, x + barW / 2, bottom + 28);
+      ctx.font = '17px Aptos, Calibri, Tahoma, Arial';
+      ctx.fillText(`${rating} étoile${rating > 1 ? 's' : ''}`, x + barW / 2, bottom + 34);
     }
     ctx.textAlign = 'left';
   }
@@ -1492,7 +1495,7 @@
       ctx.translate(x + 2, labelY);
       ctx.rotate(-Math.PI / 3);
       ctx.fillStyle = '#344054';
-      ctx.font = '10px Aptos, Calibri, Tahoma, Arial';
+      ctx.font = '14px Aptos, Calibri, Tahoma, Arial';
       ctx.fillText(name, 0, 0);
       ctx.restore();
     });
@@ -1533,7 +1536,7 @@
       start += angle;
       ctx.fillRect(legendX, 58 + index * 26, 13, 13);
       ctx.fillStyle = '#1b1f2a';
-      ctx.font = '12px Aptos, Calibri, Tahoma, Arial';
+      ctx.font = '14px Aptos, Calibri, Tahoma, Arial';
       ctx.fillText(`${label}: ${value}`, legendX + 20, 69 + index * 26);
     });
   }
