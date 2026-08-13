@@ -702,31 +702,43 @@
         <image href="assets/world-map-freepik.jpg" x="0" y="0" width="1920" height="1080" preserveAspectRatio="xMidYMid meet"></image>
         <g class="world-zone" data-world-zone="Amérique du Nord" tabindex="0" role="button" aria-label="Amérique du Nord">
           <rect class="world-hit-area" x="90" y="245" width="555" height="350" rx="28"></rect>
+          <circle class="world-bubble member" cx="352" cy="492" r="0" data-world-member-bubble="Amérique du Nord"></circle>
+          <circle class="world-bubble volunteer" cx="427" cy="492" r="0" data-world-volunteer-bubble="Amérique du Nord"></circle>
           <text class="world-label" x="390" y="392">Amérique du Nord</text>
           <text class="world-count" x="390" y="430" data-continent="Amérique du Nord">M: 0 | V: 0</text>
         </g>
         <g class="world-zone" data-world-zone="Amérique latine" tabindex="0" role="button" aria-label="Amérique latine">
           <rect class="world-hit-area" x="430" y="580" width="320" height="420" rx="28"></rect>
+          <circle class="world-bubble member" cx="548" cy="844" r="0" data-world-member-bubble="Amérique latine"></circle>
+          <circle class="world-bubble volunteer" cx="622" cy="844" r="0" data-world-volunteer-bubble="Amérique latine"></circle>
           <text class="world-label" x="585" y="742">Amérique latine</text>
           <text class="world-count" x="585" y="780" data-continent="Amérique latine">M: 0 | V: 0</text>
         </g>
         <g class="world-zone" data-world-zone="Europe" tabindex="0" role="button" aria-label="Europe">
           <rect class="world-hit-area" x="830" y="250" width="300" height="230" rx="26"></rect>
+          <circle class="world-bubble member" cx="945" cy="424" r="0" data-world-member-bubble="Europe"></circle>
+          <circle class="world-bubble volunteer" cx="1019" cy="424" r="0" data-world-volunteer-bubble="Europe"></circle>
           <text class="world-label" x="982" y="352">Europe</text>
           <text class="world-count" x="982" y="390" data-continent="Europe">M: 0 | V: 0</text>
         </g>
         <g class="world-zone" data-world-zone="Afrique hors RDC" tabindex="0" role="button" aria-label="Afrique hors RDC">
           <rect class="world-hit-area" x="820" y="455" width="380" height="500" rx="28"></rect>
+          <circle class="world-bubble member" cx="973" cy="752" r="0" data-world-member-bubble="Afrique hors RDC"></circle>
+          <circle class="world-bubble volunteer" cx="1047" cy="752" r="0" data-world-volunteer-bubble="Afrique hors RDC"></circle>
           <text class="world-label" x="1010" y="650">Afrique hors RDC</text>
           <text class="world-count" x="1010" y="688" data-continent="Afrique hors RDC">M: 0 | V: 0</text>
         </g>
         <g class="world-zone" data-world-zone="Asie" tabindex="0" role="button" aria-label="Asie">
           <rect class="world-hit-area" x="1080" y="250" width="650" height="420" rx="30"></rect>
+          <circle class="world-bubble member" cx="1368" cy="532" r="0" data-world-member-bubble="Asie"></circle>
+          <circle class="world-bubble volunteer" cx="1442" cy="532" r="0" data-world-volunteer-bubble="Asie"></circle>
           <text class="world-label" x="1405" y="430">Asie</text>
           <text class="world-count" x="1405" y="468" data-continent="Asie">M: 0 | V: 0</text>
         </g>
         <g class="world-zone" data-world-zone="Océanie" tabindex="0" role="button" aria-label="Océanie">
           <rect class="world-hit-area" x="1435" y="680" width="360" height="250" rx="28"></rect>
+          <circle class="world-bubble member" cx="1578" cy="892" r="0" data-world-member-bubble="Océanie"></circle>
+          <circle class="world-bubble volunteer" cx="1652" cy="892" r="0" data-world-volunteer-bubble="Océanie"></circle>
           <text class="world-label" x="1615" y="792">Océanie</text>
           <text class="world-count" x="1615" y="830" data-continent="Océanie">M: 0 | V: 0</text>
         </g>
@@ -782,6 +794,10 @@
       const item = stats[province.name] || { members: 0, volunteers: 0 };
       return [item.members, item.volunteers];
     }));
+    const maxContinentValue = Math.max(1, ...continents.flatMap(name => {
+      const item = stats[name] || { members: 0, volunteers: 0 };
+      return [item.members, item.volunteers];
+    }));
     setText('totalMembers', total.members);
     setText('totalVolunteers', total.volunteers);
     setText('totalUnique', total.people);
@@ -791,6 +807,10 @@
       });
       document.querySelectorAll(`[data-label="${cssEscape(name)}"]`).forEach(el => {
         el.classList.toggle('empty-zone', item.members + item.volunteers === 0);
+      });
+      document.querySelectorAll(`[data-province-shape="${cssEscape(name)}"]`).forEach(el => {
+        const provinceGroup = el.closest('.province');
+        if (provinceGroup) provinceGroup.classList.toggle('has-data', item.members + item.volunteers > 0);
       });
       document.querySelectorAll(`[data-province-shape="${cssEscape(name)}"] title`).forEach(el => {
         el.textContent = `${name} - Membres: ${item.members} | Volontaires: ${item.volunteers}`;
@@ -803,12 +823,26 @@
       });
       const continent = document.querySelector(`[data-continent="${cssEscape(name)}"]`);
       if (continent) continent.textContent = `M: ${item.members} | V: ${item.volunteers}`;
+      document.querySelectorAll(`[data-world-zone="${cssEscape(name)}"]`).forEach(el => {
+        el.classList.toggle('has-data', item.members + item.volunteers > 0);
+      });
+      document.querySelectorAll(`[data-world-member-bubble="${cssEscape(name)}"]`).forEach(el => {
+        el.setAttribute('r', worldBubbleRadius(item.members, maxContinentValue));
+      });
+      document.querySelectorAll(`[data-world-volunteer-bubble="${cssEscape(name)}"]`).forEach(el => {
+        el.setAttribute('r', worldBubbleRadius(item.volunteers, maxContinentValue));
+      });
     });
   }
 
   function bubbleRadius(value, max) {
     if (!value) return 0;
     return (4 + Math.sqrt(value / max) * 7).toFixed(1);
+  }
+
+  function worldBubbleRadius(value, max) {
+    if (!value) return 0;
+    return (18 + Math.sqrt(value / max) * 30).toFixed(1);
   }
 
   function renderGlobalMood(items) {

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Situation démographique des membres</title>
-  <link rel="stylesheet" href="style.css?v=20260813-4">
+  <link rel="stylesheet" href="style.css?v=20260813-5">
 </head>
 <body>
   <header class="topbar">
@@ -120,7 +120,10 @@
     <section class="map-section">
       <div class="map-main">
       <div class="map-shell panel">
-        <button class="button primary map-float-action" type="button" id="openRegistration">Pas enregistré? Commencer ici</button>
+        <div class="registration-callout">
+          <button class="button primary map-float-action" type="button" id="openRegistration">Pas enregistré? Commencer ici</button>
+          <span>Enregistrez-vous pour voir votre localisation sur la carte.</span>
+        </div>
         <div class="map-toolbar">
           <h2>RDC - 26 provinces</h2>
           <div class="legend">
@@ -192,9 +195,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260813-4"></script>
-  <script src="rdc-provinces-geojson.js?v=20260813-4"></script>
-  <script src="app.js?v=20260813-4"></script>
+  <script src="supabase-config.js?v=20260813-5"></script>
+  <script src="rdc-provinces-geojson.js?v=20260813-5"></script>
+  <script src="app.js?v=20260813-5"></script>
   <script>
     PMIMapApp.initHome();
   </script>
