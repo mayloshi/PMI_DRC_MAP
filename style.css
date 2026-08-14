@@ -415,6 +415,14 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
   border-top: 1px solid var(--line);
 }
 
+.mobile-satisfaction-hint {
+  display: none;
+  margin: 0;
+  color: #4f17a8;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 .side-stack .survey-box {
   padding-top: 16px;
   border-top: 0;
@@ -1041,6 +1049,10 @@ th {
     transform: none;
     width: calc(100% - 24px);
     margin: 12px 12px 0;
+  }
+
+  .mobile-satisfaction-hint {
+    display: block;
   }
 
   svg {
