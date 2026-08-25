@@ -460,6 +460,23 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
   min-height: 360px;
 }
 
+.home-world-chart {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.home-world-chart h3 {
+  margin: 0 0 8px;
+  color: #263246;
+  font-size: 17px;
+}
+
+.home-world-chart canvas {
+  width: 100%;
+  min-height: 280px;
+}
+
 .stars {
   display: flex;
   gap: 4px;

@@ -925,7 +925,7 @@
     const stats = buildStats(profiles);
     renderCounts(stats);
     renderGlobalMood(satisfaction);
-    drawHomeHistograms(stats, satisfaction);
+    drawHomeHistograms(stats, satisfaction, profiles);
   }
 
   function renderCounts(stats) {
@@ -996,10 +996,11 @@
     setText('yearMoodEmoji', moodEmoji(yearAvg));
   }
 
-  function drawHomeHistograms(stats, satisfaction) {
+  function drawHomeHistograms(stats, satisfaction, profiles) {
     drawSingleProvinceHistogram('homeMembersChart', stats, 'members', 'Membres par province', '#4f17a8');
     drawSingleProvinceHistogram('homeVolunteersChart', stats, 'volunteers', 'Volontaires par province', '#00b5d1');
     drawStarsHistogram('homeStarsChart', satisfaction);
+    drawWorldCountryChart('homeWorldCountryChart', buildCountryStats(profiles || []));
   }
 
   function drawSingleProvinceHistogram(id, stats, field, title, color) {
@@ -1216,6 +1217,7 @@
       actionSelect.disabled = !enabled;
       if (!enabled) actionSelect.value = 'add';
       configureRoleChoices(profile);
+      if (profile) rememberVisitor(profile);
     } catch (error) {
       actionSelect.value = 'add';
       configureRoleChoices(null);
