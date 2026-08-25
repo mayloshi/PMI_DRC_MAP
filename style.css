@@ -86,13 +86,18 @@ p {
 }
 
 .visitor-badge {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 12;
   padding: 8px 10px;
   border: 1px solid rgba(79, 23, 168, .18);
   border-radius: 8px;
   background: #fff;
   color: #4f17a8;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 800;
+  box-shadow: 0 8px 22px rgba(25, 30, 45, .16);
 }
 
 .global-mood {
@@ -461,20 +466,19 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
 }
 
 .home-world-chart {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
+  margin-top: 18px;
+  padding: 16px;
 }
 
-.home-world-chart h3 {
+.home-world-chart h2, .home-world-chart h3 {
   margin: 0 0 8px;
   color: #263246;
-  font-size: 17px;
+  font-size: 18px;
 }
 
 .home-world-chart canvas {
   width: 100%;
-  min-height: 280px;
+  min-height: 340px;
 }
 
 .stars {

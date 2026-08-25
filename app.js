@@ -28,7 +28,8 @@
     'Amerique du Nord': 'Amérique du Nord',
     'Amerique latine': 'Amérique latine',
     Oceanie: 'Océanie',
-    Equateur: 'Équateur'
+    Equateur: 'Équateur',
+    'Kongo Central': 'Kongo-Central'
   };
 
   const provinceNameMap = {
@@ -131,15 +132,17 @@
       label: profileDisplayName(profile)
     };
     setCookie(VISITOR_COOKIE, JSON.stringify(payload), 90);
+    writeJson(VISITOR_COOKIE, payload);
     renderVisitorBadge(payload);
   }
 
   function savedVisitor() {
     try {
       const raw = getCookie(VISITOR_COOKIE);
-      return raw ? JSON.parse(decodeURIComponent(raw)) : null;
+      if (raw) return JSON.parse(decodeURIComponent(raw));
+      return readJson(VISITOR_COOKIE, null);
     } catch (error) {
-      return null;
+      return readJson(VISITOR_COOKIE, null);
     }
   }
 
@@ -149,6 +152,20 @@
     const label = visitor && (visitor.label || visitor.email || visitor.pmiId);
     badge.textContent = label ? `Bonjour, ${label}` : '';
     badge.hidden = !label;
+  }
+
+  function refreshVisitorFromProfiles(profiles) {
+    const visitor = savedVisitor();
+    if (!visitor) return;
+    const profile = findProfileByIdentity(profiles, {
+      email: visitor.email || '',
+      pmiId: visitor.pmiId || ''
+    });
+    if (profile) {
+      rememberVisitor(profile);
+    } else {
+      renderVisitorBadge(visitor);
+    }
   }
 
   async function loadProfiles() {
@@ -923,6 +940,7 @@
     const profiles = await loadProfiles();
     const satisfaction = await loadSatisfaction();
     const stats = buildStats(profiles);
+    refreshVisitorFromProfiles(profiles);
     renderCounts(stats);
     renderGlobalMood(satisfaction);
     drawHomeHistograms(stats, satisfaction, profiles);
