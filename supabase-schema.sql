@@ -6,6 +6,15 @@ create table if not exists public.pmi_drc_map_profiles (
   updated_at timestamptz not null default now(),
   email text,
   pmi_id text,
+  firstname text,
+  lastname text,
+  primary_phone text,
+  certification text,
+  jobtitle text,
+  industry text,
+  companyname text,
+  primarycity text,
+  primarycountryname text,
   gender text check (gender in ('M', 'F') or gender is null),
   occupation_status text check (occupation_status in ('Etudiant', 'Professionnel') or occupation_status is null),
   member_active boolean not null default false,
@@ -59,6 +68,16 @@ alter table public.pmi_drc_map_profiles alter column email drop not null;
 alter table public.pmi_drc_map_profiles alter column pmi_id drop not null;
 alter table public.pmi_drc_map_satisfaction alter column email drop not null;
 alter table public.pmi_drc_map_satisfaction alter column pmi_id drop not null;
+
+alter table public.pmi_drc_map_profiles add column if not exists firstname text;
+alter table public.pmi_drc_map_profiles add column if not exists lastname text;
+alter table public.pmi_drc_map_profiles add column if not exists primary_phone text;
+alter table public.pmi_drc_map_profiles add column if not exists certification text;
+alter table public.pmi_drc_map_profiles add column if not exists jobtitle text;
+alter table public.pmi_drc_map_profiles add column if not exists industry text;
+alter table public.pmi_drc_map_profiles add column if not exists companyname text;
+alter table public.pmi_drc_map_profiles add column if not exists primarycity text;
+alter table public.pmi_drc_map_profiles add column if not exists primarycountryname text;
 
 drop policy if exists "Public read profiles" on public.pmi_drc_map_profiles;
 create policy "Public read profiles"

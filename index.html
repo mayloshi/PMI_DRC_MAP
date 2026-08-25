@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Situation démographique des membres</title>
-  <link rel="stylesheet" href="style.css?v=20260814-1">
+  <link rel="stylesheet" href="style.css?v=20260825-1">
 </head>
 <body>
   <header class="topbar">
@@ -16,6 +16,7 @@
       <p>Localisation des membres, volontaires et mesure mensuelle de satisfaction</p>
     </div>
     <div class="header-actions">
+      <span class="visitor-badge" id="visitorBadge" hidden></span>
       <div class="global-mood" title="Satisfaction du mois courant">
         <span id="monthMoodEmoji">-</span>
         <strong id="monthMoodScore">Mois 0.0/5</strong>
@@ -79,6 +80,7 @@
         </div>
       </div>
       <button class="button secondary" type="button" id="updateProfileInfo" disabled>Mettre à jour sexe/statut</button>
+      <div class="status small-status" id="existingProfileHint"></div>
 
       <h2>📍 Votre statut PMI actuel</h2>
       <div class="two-cols">
@@ -196,9 +198,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260814-1"></script>
-  <script src="rdc-provinces-geojson.js?v=20260814-1"></script>
-  <script src="app.js?v=20260814-1"></script>
+  <script src="supabase-config.js?v=20260825-1"></script>
+  <script src="rdc-provinces-geojson.js?v=20260825-1"></script>
+  <script src="app.js?v=20260825-1"></script>
   <script>
     PMIMapApp.initHome();
   </script>

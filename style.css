@@ -85,6 +85,16 @@ p {
   flex-wrap: wrap;
 }
 
+.visitor-badge {
+  padding: 8px 10px;
+  border: 1px solid rgba(79, 23, 168, .18);
+  border-radius: 8px;
+  background: #fff;
+  color: #4f17a8;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .global-mood {
   min-width: 96px;
   display: flex;
@@ -406,6 +416,12 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
 .status.success {
   background: #ecf9f3;
   color: #146341;
+}
+
+.small-status {
+  min-height: 0;
+  padding: 8px 10px;
+  font-size: 12.5px;
 }
 
 .survey-box {

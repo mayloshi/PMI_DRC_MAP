@@ -3,6 +3,7 @@
   const SAT_KEY = 'pmi-rdc-map-satisfaction-v1';
   const LOG_KEY = 'pmi-rdc-map-logs-v1';
   const DASHBOARD_ACCESS_KEY = 'pmi-rdc-dashboard-access-v1';
+  const VISITOR_COOKIE = 'pmi_drc_visitor';
 
   const continents = [
     'Afrique hors RDC',
@@ -104,6 +105,52 @@
     return `${fallback} Code ${response.status}.${detail ? ` Detail: ${detail}` : ''}`;
   }
 
+  function compactText(value) {
+    return String(value || '').trim();
+  }
+
+  function profileDisplayName(profile) {
+    const name = [profile.firstname, profile.lastname].map(compactText).filter(Boolean).join(' ');
+    return name || profile.email || profile.pmiId || '';
+  }
+
+  function setCookie(name, value, days) {
+    const maxAge = Math.max(1, days || 30) * 86400;
+    document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; max-age=${maxAge}; path=/; SameSite=Lax`;
+  }
+
+  function getCookie(name) {
+    const encoded = `${encodeURIComponent(name)}=`;
+    return document.cookie.split(';').map(item => item.trim()).find(item => item.startsWith(encoded))?.slice(encoded.length) || '';
+  }
+
+  function rememberVisitor(profile) {
+    const payload = {
+      email: profile.email || '',
+      pmiId: profile.pmiId || '',
+      label: profileDisplayName(profile)
+    };
+    setCookie(VISITOR_COOKIE, JSON.stringify(payload), 90);
+    renderVisitorBadge(payload);
+  }
+
+  function savedVisitor() {
+    try {
+      const raw = getCookie(VISITOR_COOKIE);
+      return raw ? JSON.parse(decodeURIComponent(raw)) : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function renderVisitorBadge(visitor) {
+    const badge = document.getElementById('visitorBadge');
+    if (!badge) return;
+    const label = visitor && (visitor.label || visitor.email || visitor.pmiId);
+    badge.textContent = label ? `Bonjour, ${label}` : '';
+    badge.hidden = !label;
+  }
+
   async function loadProfiles() {
     if (!isSupabaseConfigured()) return readJson(PROFILE_KEY, []);
     const response = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_profiles?select=*&order=updated_at.asc`, {
@@ -135,7 +182,14 @@
       headers: Object.assign({}, supabaseHeaders(), { Prefer: 'resolution=merge-duplicates' }),
       body: JSON.stringify(body)
     });
-    if (!response.ok) throw new Error(await supabaseError(response, 'Supabase a refusé la mise à jour du profil.'));
+    if (!response.ok) {
+      const fallback = await fetch(`${supabaseUrl()}/rest/v1/pmi_drc_map_profiles?on_conflict=${conflictKey}`, {
+        method: 'POST',
+        headers: Object.assign({}, supabaseHeaders(), { Prefer: 'resolution=merge-duplicates' }),
+        body: JSON.stringify(profileToLegacyRow(profile))
+      });
+      if (!fallback.ok) throw new Error(await supabaseError(fallback, 'Supabase a refusé la mise à jour du profil.'));
+    }
   }
 
   async function deleteProfile(identityValue) {
@@ -342,6 +396,15 @@
     return {
       email: profile.email || null,
       pmi_id: profile.pmiId || null,
+      firstname: profile.firstname || null,
+      lastname: profile.lastname || null,
+      primary_phone: profile.primaryPhone || null,
+      certification: profile.certification || null,
+      jobtitle: profile.jobtitle || null,
+      industry: profile.industry || null,
+      companyname: profile.companyname || null,
+      primarycity: profile.primarycity || null,
+      primarycountryname: profile.primarycountryname || null,
       gender: profile.gender,
       occupation_status: profile.occupationStatus,
       member_active: Boolean(profile.roles.member.active),
@@ -361,6 +424,15 @@
       id: row.id,
       email: row.email,
       pmiId: row.pmi_id,
+      firstname: row.firstname || '',
+      lastname: row.lastname || '',
+      primaryPhone: row.primary_phone || '',
+      certification: row.certification || '',
+      jobtitle: row.jobtitle || '',
+      industry: row.industry || '',
+      companyname: row.companyname || '',
+      primarycity: row.primarycity || '',
+      primarycountryname: row.primarycountryname || '',
       gender: row.gender || '',
       occupationStatus: row.occupation_status || '',
       roles: {
@@ -385,6 +457,15 @@
       id: cryptoId(),
       email: normalizeEmail(identity.email),
       pmiId: normalizePmiId(identity.pmiId),
+      firstname: '',
+      lastname: '',
+      primaryPhone: '',
+      certification: '',
+      jobtitle: '',
+      industry: '',
+      companyname: '',
+      primarycity: '',
+      primarycountryname: '',
       gender: identity.gender,
       occupationStatus: identity.occupationStatus,
       roles: {
@@ -487,6 +568,40 @@
     }, { members: 0, volunteers: 0, people: 0 });
   }
 
+  function isDrcCountry(country) {
+    return compactText(country).toUpperCase() === 'CONGO, THE DEMOCRATIC REPUBLIC OF THE';
+  }
+
+  function countryLabel(country) {
+    const value = compactText(country);
+    if (!value) return 'Pays non renseigné';
+    return value
+      .toLowerCase()
+      .split(/\s+/)
+      .map(part => part.length <= 3 && part !== 'and' ? part.toUpperCase() : part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ')
+      .replace("C�te", "Côte")
+      .replace("D'ivoire", "d'Ivoire");
+  }
+
+  function buildCountryStats(profiles) {
+    const countries = {};
+    profiles.forEach(profile => {
+      const country = compactText(profile.primarycountryname);
+      const memberOutside = profile.roles.member.active && (profile.roles.member.zoneType === 'Continent' || (country && !isDrcCountry(country)));
+      const volunteerOutside = profile.roles.volunteer.active && (profile.roles.volunteer.zoneType === 'Continent' || (country && !isDrcCountry(country)));
+      if (!memberOutside && !volunteerOutside) return;
+      const label = countryLabel(country || profile.roles.member.zoneName || profile.roles.volunteer.zoneName);
+      if (!countries[label]) countries[label] = { members: 0, volunteers: 0, total: 0 };
+      if (memberOutside) countries[label].members += 1;
+      if (volunteerOutside) countries[label].volunteers += 1;
+      countries[label].total = countries[label].members + countries[label].volunteers;
+    });
+    return Object.entries(countries)
+      .map(([country, stats]) => ({ country, ...stats }))
+      .sort((a, b) => b.total - a.total || a.country.localeCompare(b.country));
+  }
+
   function createSvgElement(name, attrs) {
     const el = document.createElementNS('http://www.w3.org/2000/svg', name);
     Object.keys(attrs).forEach(key => el.setAttribute(key, attrs[key]));
@@ -550,6 +665,22 @@
       width: bounds[2] - bounds[0],
       height: bounds[3] - bounds[1]
     };
+  }
+
+  function profileToLegacyRow(profile) {
+    const row = profileToRow(profile);
+    [
+      'firstname',
+      'lastname',
+      'primary_phone',
+      'certification',
+      'jobtitle',
+      'industry',
+      'companyname',
+      'primarycity',
+      'primarycountryname'
+    ].forEach(key => delete row[key]);
+    return row;
   }
 
   function eachCoordinate(geometry, callback) {
@@ -1023,6 +1154,44 @@
     if (pmiId && !profile.pmiId) profile.pmiId = pmiId;
   }
 
+  function configureRoleChoices(profile) {
+    const select = document.getElementById('roleChoice');
+    const hint = document.getElementById('existingProfileHint');
+    if (!select) return;
+    Array.from(select.options).forEach(option => {
+      option.disabled = false;
+    });
+    if (!profile) {
+      if (hint) hint.textContent = '';
+      return;
+    }
+    const hasMember = profile.roles.member.active;
+    const hasVolunteer = profile.roles.volunteer.active;
+    const name = profileDisplayName(profile);
+    if (hasMember && !hasVolunteer) {
+      setRoleOptionState(select, ['member', 'both'], true);
+      select.value = 'volunteer';
+      if (hint) hint.textContent = `${name} est déjà enregistré comme membre. Vous pouvez seulement ajouter le statut volontaire.`;
+    } else if (!hasMember && hasVolunteer) {
+      setRoleOptionState(select, ['volunteer', 'both'], true);
+      select.value = 'member';
+      if (hint) hint.textContent = `${name} est déjà enregistré comme volontaire. Vous pouvez seulement ajouter le statut membre.`;
+    } else if (hasMember && hasVolunteer) {
+      setRoleOptionState(select, ['both'], true);
+      if (select.value === 'both' || !select.value) select.value = 'member';
+      if (hint) hint.textContent = `${name} a déjà les deux statuts. Vous pouvez mettre à jour un statut précis.`;
+    } else if (hint) {
+      hint.textContent = `${name} existe déjà dans la base. Complétez son statut PMI.`;
+    }
+  }
+
+  function setRoleOptionState(select, values, disabled) {
+    values.forEach(value => {
+      const option = Array.from(select.options).find(item => item.value === value);
+      if (option) option.disabled = disabled;
+    });
+  }
+
   async function existingProfileForForm() {
     const identity = readIdentityForLookup();
     const profiles = await loadProfiles();
@@ -1046,8 +1215,10 @@
       cancelButton.disabled = !enabled;
       actionSelect.disabled = !enabled;
       if (!enabled) actionSelect.value = 'add';
+      configureRoleChoices(profile);
     } catch (error) {
       actionSelect.value = 'add';
+      configureRoleChoices(null);
     }
   }
 
@@ -1082,6 +1253,7 @@
       });
       await refreshHome();
       await updateExistingActionState();
+      rememberVisitor(profile);
       setStatus(result.message, 'success');
       showToast('Localisation enregistrée', [
         `Email : ${profile.email || 'non renseigné'}`,
@@ -1163,6 +1335,7 @@
       });
       await refreshHome();
       await updateExistingActionState();
+      rememberVisitor(profile);
       setStatus('Sexe/statut mis à jour.', 'success');
     } catch (error) {
       setStatus(error.message, 'error');
@@ -1253,6 +1426,7 @@
   async function initHome() {
     const month = document.getElementById('surveyMonth');
     if (month) month.value = currentPeriod();
+    renderVisitorBadge(savedVisitor());
     initMap(handleZone);
     initContinents(handleZone);
     initZoneSelect();
@@ -1263,11 +1437,15 @@
       setStatus('Enregistrement en cours...', '');
       setBusy(true, 'Enregistrement en cours...');
       try {
-        const identity = readIdentity();
+        const identity = readIdentityForLookup();
         const rating = getRating();
         if (!rating) throw new Error('Choisissez une note de satisfaction de 1 \u00e0 5.');
         const period = currentPeriod();
         const previous = existingSatisfaction(await loadSatisfaction(), identity, period);
+        if (previous && !confirm('Vous avez déjà soumis une enquête pour ce mois. Voulez-vous mettre à jour la précédente ?')) {
+          setStatus("L'enquête précédente n'a pas été modifiée.", 'error');
+          return;
+        }
         await saveSatisfaction({
           id: cryptoId(),
           email: normalizeEmail(identity.email),
@@ -1283,6 +1461,9 @@
           details: `Période: ${period}. Note: ${rating}/5.`
         });
         await refreshHome();
+        const profiles = await loadProfiles();
+        const profile = findProfileByIdentity(profiles, identity);
+        if (profile) rememberVisitor(profile);
         setStatus(previous ? 'Votre enquête de satisfaction précédente pour ce mois a été remplacée.' : 'Satisfaction mensuelle enregistrée.', 'success');
         showToast('Satisfaction enregistrée', [
           `Vote : ${rating}/5 étoile${rating > 1 ? 's' : ''}`
@@ -1367,6 +1548,8 @@
       await logAction('export png', { details: 'Export histogramme PNG.' });
       exportPng();
     });
+    document.getElementById('copyMemberEmails').addEventListener('click', () => copyRoleEmails('member'));
+    document.getElementById('copyVolunteerEmails').addEventListener('click', () => copyRoleEmails('volunteer'));
     document.getElementById('downloadConfig').addEventListener('click', downloadSupabaseConfig);
     document.getElementById('supabaseUrl').addEventListener('input', refreshConfigPreview);
     document.getElementById('supabaseAnon').addEventListener('input', refreshConfigPreview);
@@ -1467,6 +1650,7 @@
       setText('kpiSatisfaction', satAvg.toFixed(1));
       setText('dashboardEmoji', moodEmoji(satAvg));
       drawProvinceChart('provinceChart', stats);
+      drawWorldCountryChart('worldCountryChart', buildCountryStats(profiles));
       drawPieChart('genderChart', countBy(profiles, 'gender'), 'Sexe');
       drawPieChart('occupationChart', countBy(profiles, 'occupationStatus'), 'Étudiant / Professionnel');
       renderNiko(satisfaction);
@@ -1516,6 +1700,50 @@
     ctx.fillRect(pad + 100, 45, 14, 14);
     ctx.fillStyle = '#1b1f2a';
     ctx.fillText('Volontaires', pad + 120, 57);
+  }
+
+  function drawWorldCountryChart(id, entries) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    clearCanvas(ctx, canvas);
+    const rows = entries.slice(0, 18);
+    const max = Math.max(1, ...rows.map(item => item.total));
+    const left = 170;
+    const top = 54;
+    const rowH = 15;
+    const gap = 4;
+    const chartW = canvas.width - left - 50;
+    ctx.fillStyle = '#1b1f2a';
+    ctx.font = '18px Aptos, Calibri, Tahoma, Arial';
+    ctx.fillText('Membres et volontaires hors RDC par pays', 20, 28);
+    rows.forEach((item, index) => {
+      const y = top + index * (rowH + gap);
+      const memberW = item.members / max * chartW;
+      const volunteerW = item.volunteers / max * chartW;
+      ctx.fillStyle = '#344054';
+      ctx.font = '12px Aptos, Calibri, Tahoma, Arial';
+      ctx.textAlign = 'right';
+      ctx.fillText(item.country, left - 12, y + 11);
+      ctx.fillStyle = '#4f17a8';
+      ctx.fillRect(left, y, memberW, rowH);
+      ctx.fillStyle = '#00b5d1';
+      ctx.fillRect(left + memberW, y, volunteerW, rowH);
+      ctx.fillStyle = '#1b1f2a';
+      ctx.textAlign = 'left';
+      ctx.fillText(String(item.total), left + memberW + volunteerW + 8, y + 11);
+    });
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#4f17a8';
+    ctx.fillRect(20, canvas.height - 28, 12, 12);
+    ctx.fillStyle = '#1b1f2a';
+    ctx.font = '12px Aptos, Calibri, Tahoma, Arial';
+    ctx.fillText('Membres', 38, canvas.height - 18);
+    ctx.fillStyle = '#00b5d1';
+    ctx.fillRect(110, canvas.height - 28, 12, 12);
+    ctx.fillStyle = '#1b1f2a';
+    ctx.fillText('Volontaires', 128, canvas.height - 18);
+    if (!rows.length) ctx.fillText('Aucun profil hors RDC avec pays renseigné.', 20, 80);
   }
 
   function drawPieChart(id, counts, title) {
@@ -1622,9 +1850,19 @@
     body.innerHTML = '';
     profiles.forEach(profile => {
       const tr = document.createElement('tr');
+      const phone = compactText(profile.primaryPhone);
       tr.innerHTML = `
+        <td>${escapeHtml(profile.firstname || '')}</td>
+        <td>${escapeHtml(profile.lastname || '')}</td>
         <td>${escapeHtml(profile.email)}</td>
         <td>${escapeHtml(profile.pmiId)}</td>
+        <td>${phone ? `<a href="${whatsappHref(phone)}" target="_blank" rel="noopener">${escapeHtml(phone)}</a>` : ''}</td>
+        <td>${escapeHtml(profile.certification || '')}</td>
+        <td>${escapeHtml(profile.jobtitle || '')}</td>
+        <td>${escapeHtml(profile.industry || '')}</td>
+        <td>${escapeHtml(profile.companyname || '')}</td>
+        <td>${escapeHtml(profile.primarycity || '')}</td>
+        <td>${escapeHtml(countryLabel(profile.primarycountryname || ''))}</td>
         <td>${profile.gender === 'M' ? '👨 M' : profile.gender === 'F' ? '👩 F' : ''}</td>
         <td>${profile.occupationStatus === 'Etudiant' ? '🎓 Étudiant' : profile.occupationStatus === 'Professionnel' ? '💼 Professionnel' : ''}</td>
         <td>${roleText(profile.roles.member, '💜')}</td>
@@ -1641,7 +1879,12 @@
         await refreshDashboard();
       });
     });
-    if (!body.children.length) body.innerHTML = '<tr><td colspan="7">Aucun profil.</td></tr>';
+    if (!body.children.length) body.innerHTML = '<tr><td colspan="16">Aucun profil.</td></tr>';
+  }
+
+  function whatsappHref(phone) {
+    const digits = String(phone || '').replace(/[^\d]/g, '');
+    return `https://wa.me/${encodeURIComponent(digits)}`;
   }
 
   async function renderLogs() {
@@ -1679,10 +1922,19 @@
   async function exportCsv() {
     const profiles = await loadProfiles();
     const rows = [
-      ['Email', 'PMI ID', 'Sexe', 'Statut', 'Membre actif', 'Province membre', 'Volontaire actif', 'Province volontaire'],
+      ['Prenom', 'Nom', 'Email', 'PMI ID', 'Telephone', 'Certification', 'Fonction', 'Industrie', 'Entreprise', 'Ville', 'Pays', 'Sexe', 'Statut', 'Membre actif', 'Zone membre', 'Volontaire actif', 'Zone volontaire'],
       ...profiles.map(profile => [
+        profile.firstname,
+        profile.lastname,
         profile.email,
         profile.pmiId,
+        profile.primaryPhone,
+        profile.certification,
+        profile.jobtitle,
+        profile.industry,
+        profile.companyname,
+        profile.primarycity,
+        countryLabel(profile.primarycountryname),
         profile.gender,
         profile.occupationStatus === 'Etudiant' ? 'Étudiant' : profile.occupationStatus,
         profile.roles.member.active ? 'Oui' : 'Non',
@@ -1700,6 +1952,28 @@
     link.href = source.toDataURL('image/png');
     link.download = `PMI_RDC_histogramme_${today()}.png`;
     link.click();
+  }
+
+  async function copyRoleEmails(role) {
+    const profiles = await loadProfiles();
+    const emails = Array.from(new Set(
+      profiles
+        .filter(profile => profile.roles[role] && profile.roles[role].active)
+        .map(profile => normalizeEmail(profile.email))
+        .filter(Boolean)
+    )).sort();
+    if (!emails.length) {
+      setDashboardStatus(`Aucune adresse email trouvée pour les ${role === 'member' ? 'membres' : 'volontaires'}.`, 'error');
+      return;
+    }
+    const text = emails.join('; ');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      downloadText(text, `emails_${role}_${today()}.txt`, 'text/plain;charset=utf-8');
+    }
+    await logAction('copie emails', { details: `${emails.length} emails ${role === 'member' ? 'membres' : 'volontaires'} copiés.` });
+    setDashboardStatus(`${emails.length} adresses email copiées.`, 'success');
   }
 
   function countBy(profiles, key) {

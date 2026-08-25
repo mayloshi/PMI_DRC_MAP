@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Situation démographique des membres</title>
-  <link rel="stylesheet" href="style.css?v=20260814-1">
+  <link rel="stylesheet" href="style.css?v=20260825-1">
 </head>
 <body>
   <header class="topbar">
@@ -69,11 +69,18 @@
           <div class="button-row">
             <button class="button secondary" type="button" id="exportCsv">⬇️ Exporter CSV</button>
             <button class="button secondary" type="button" id="exportPng">🖼️ Exporter PNG</button>
+            <button class="button secondary" type="button" id="copyMemberEmails">Copier emails membres</button>
+            <button class="button secondary" type="button" id="copyVolunteerEmails">Copier emails volontaires</button>
             <button class="button danger" type="button" id="resetSatisfaction">Remettre les satisfactions à zéro</button>
             <button class="button danger" type="button" id="resetAll">❌ Remise à zéro</button>
           </div>
         </div>
         <canvas id="provinceChart" width="880" height="320"></canvas>
+      </section>
+
+      <section class="panel">
+        <h2>Chapitre PMI RDC dans le monde</h2>
+        <canvas id="worldCountryChart" width="980" height="340"></canvas>
       </section>
 
       <section class="panel">
@@ -114,8 +121,9 @@
           <table>
             <thead>
               <tr>
-                <th>📧 Email</th><th>🆔 PMI ID</th><th>👤 Sexe</th><th>🎓💼 Statut</th>
-                <th>💜 Membre</th><th>🙋 Volontaire</th><th>🛠 Action</th>
+                <th>Prénom</th><th>Nom</th><th>📧 Email</th><th>🆔 PMI ID</th><th>📱 Téléphone</th>
+                <th>Certification</th><th>Fonction</th><th>Industrie</th><th>Entreprise</th><th>Ville</th><th>Pays</th>
+                <th>👤 Sexe</th><th>🎓💼 Statut</th><th>💜 Membre</th><th>🙋 Volontaire</th><th>🛠 Action</th>
               </tr>
             </thead>
             <tbody id="profilesBody"></tbody>
@@ -143,9 +151,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260814-1"></script>
-  <script src="rdc-provinces-geojson.js?v=20260814-1"></script>
-  <script src="app.js?v=20260814-1"></script>
+  <script src="supabase-config.js?v=20260825-1"></script>
+  <script src="rdc-provinces-geojson.js?v=20260825-1"></script>
+  <script src="app.js?v=20260825-1"></script>
   <script>
     PMIMapApp.initDashboard();
   </script>
