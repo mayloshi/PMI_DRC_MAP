@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Situation démographique des membres</title>
-  <link rel="stylesheet" href="style.css?v=20260825-3">
+  <link rel="stylesheet" href="style.css?v=20261020-1">
 </head>
 <body>
   <header class="topbar">
@@ -59,6 +59,7 @@
             <div><strong id="kpiPeople">0</strong><span>Personnes</span></div>
             <div><strong id="kpiSatisfaction">0.0</strong><span>⭐ Satisfaction</span></div>
           </div>
+          <p class="note" id="kpiUnlocated" hidden></p>
           <div class="dashboard-emoji" id="dashboardEmoji">-</div>
         </section>
       </div>
@@ -151,9 +152,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260825-3"></script>
-  <script src="rdc-provinces-geojson.js?v=20260825-3"></script>
-  <script src="app.js?v=20260825-3"></script>
+  <script src="supabase-config.js?v=20261020-1"></script>
+  <script src="rdc-provinces-geojson.js?v=20261020-1"></script>
+  <script src="app.js?v=20261020-1"></script>
   <script>
     PMIMapApp.initDashboard();
   </script>

@@ -576,13 +576,31 @@
     return zones;
   }
 
-  function totals(stats) {
-    return Object.values(stats).reduce((acc, item) => {
-      acc.members += item.members;
-      acc.volunteers += item.volunteers;
-      acc.people += item.people;
+  function totals(profiles, stats) {
+    return profiles.reduce((acc, profile) => {
+      const member = profile.roles.member;
+      const volunteer = profile.roles.volunteer;
+      if (member.active) {
+        acc.members += 1;
+        if (!stats[normalizeZoneName(member.zoneName)]) acc.unlocatedMembers += 1;
+      }
+      if (volunteer.active) {
+        acc.volunteers += 1;
+        if (!stats[normalizeZoneName(volunteer.zoneName)]) acc.unlocatedVolunteers += 1;
+      }
+      if (member.active || volunteer.active) acc.people += 1;
       return acc;
-    }, { members: 0, volunteers: 0, people: 0 });
+    }, { members: 0, volunteers: 0, people: 0, unlocatedMembers: 0, unlocatedVolunteers: 0 });
+  }
+
+  function renderUnlocatedSummary(id, total) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    const parts = [];
+    if (total.unlocatedMembers) parts.push(`${total.unlocatedMembers} membre${total.unlocatedMembers > 1 ? 's' : ''}`);
+    if (total.unlocatedVolunteers) parts.push(`${total.unlocatedVolunteers} volontaire${total.unlocatedVolunteers > 1 ? 's' : ''}`);
+    element.textContent = parts.length ? `Sans localisation sur la carte : ${parts.join(' et ')}.` : '';
+    element.hidden = parts.length === 0;
   }
 
   function isDrcCountry(country) {
@@ -941,13 +959,13 @@
     const satisfaction = await loadSatisfaction();
     const stats = buildStats(profiles);
     refreshVisitorFromProfiles(profiles);
-    renderCounts(stats);
+    renderCounts(stats, profiles);
     renderGlobalMood(satisfaction);
     drawHomeHistograms(stats, satisfaction, profiles);
   }
 
-  function renderCounts(stats) {
-    const total = totals(stats);
+  function renderCounts(stats, profiles) {
+    const total = totals(profiles, stats);
     const maxProvinceValue = Math.max(1, ...provinces().flatMap(province => {
       const item = stats[province.name] || { members: 0, volunteers: 0 };
       return [item.members, item.volunteers];
@@ -959,6 +977,7 @@
     setText('totalMembers', total.members);
     setText('totalVolunteers', total.volunteers);
     setText('totalUnique', total.people);
+    renderUnlocatedSummary('totalUnlocated', total);
     Object.entries(stats).forEach(([name, item]) => {
       document.querySelectorAll(`[data-zone-count="${cssEscape(name)}"]`).forEach(el => {
         el.textContent = `M: ${item.members} | V: ${item.volunteers}`;
@@ -1662,11 +1681,12 @@
       const profiles = await loadProfiles();
       const satisfaction = await loadSatisfaction();
       const stats = buildStats(profiles);
-      const total = totals(stats);
+      const total = totals(profiles, stats);
       const satAvg = average(satisfaction.map(item => item.rating));
       setText('kpiMembers', total.members);
       setText('kpiVolunteers', total.volunteers);
       setText('kpiPeople', total.people);
+      renderUnlocatedSummary('kpiUnlocated', total);
       setText('kpiSatisfaction', satAvg.toFixed(1));
       setText('dashboardEmoji', moodEmoji(satAvg));
       drawProvinceChart('provinceChart', stats);

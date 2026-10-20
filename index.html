@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PMI RDC - Situation démographique des membres</title>
-  <link rel="stylesheet" href="style.css?v=20260825-3">
+  <link rel="stylesheet" href="style.css?v=20261020-1">
 </head>
 <body>
   <header class="topbar">
@@ -140,6 +140,7 @@
             <div><strong>🙋 Volontaires</strong><span id="totalVolunteers">0</span></div>
             <div><strong>Personnes actives</strong><span id="totalUnique">0</span></div>
           </div>
+          <p class="note" id="totalUnlocated" hidden></p>
         </section>
         <div class="map-wrap">
           <svg viewBox="0 0 1160 820" role="img" aria-label="Carte cliquable de la RDC avec les 26 provinces">
@@ -202,9 +203,9 @@
     </section>
   </main>
 
-  <script src="supabase-config.js?v=20260825-3"></script>
-  <script src="rdc-provinces-geojson.js?v=20260825-3"></script>
-  <script src="app.js?v=20260825-3"></script>
+  <script src="supabase-config.js?v=20261020-1"></script>
+  <script src="rdc-provinces-geojson.js?v=20261020-1"></script>
+  <script src="app.js?v=20261020-1"></script>
   <script>
     PMIMapApp.initHome();
   </script>
